@@ -1,0 +1,65 @@
+{
+  "name": "@rotki/eslint-plugin",
+  "version": "0.0.1",
+  "packageManager": "pnpm@8.9.0",
+  "type": "commonjs",
+  "license": "AGPL-3.0",
+  "author": "Rotki Solutions GmbH <info@rotki.com>",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/src/index.js",
+  "scripts": {
+    "clean": "rimraf .nyc_output coverage dist docs/.vitepress/dist",
+    "coverage": "nyc report --reporter lcov && opener coverage/lcov-report/index.html",
+    "generate": "ts-node scripts/update.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "tsc --project ./tsconfig.build.json",
+    "prepublishOnly": "nr build",
+    "test": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
+    "test:debug": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
+    "test:coverage": "nyc mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\" --timeout 60000",
+    "new": "ts-node ./scripts/new-rule.ts",
+    "docs": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "prepare": "husky install",
+    "release": "bumpp -r --no-push"
+  },
+  "peerDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/utils": "6.7.5",
+    "jsonc-eslint-parser": "2.3.0",
+    "vue-eslint-parser": "9.3.2",
+    "yaml-eslint-parser": "1.2.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "17.7.2",
+    "@commitlint/config-conventional": "17.7.0",
+    "@rotki/eslint-config": "1.1.2",
+    "@types/eslint": "8.44.4",
+    "@types/node": "18",
+    "@typescript-eslint/eslint-plugin": "6.7.5",
+    "@typescript-eslint/parser": "6.7.5",
+    "@typescript-eslint/rule-tester": "6.7.5",
+    "bumpp": "9.2.0",
+    "eslint": "8.51.0",
+    "husky": "8.0.3",
+    "lint-staged": "14.0.1",
+    "mocha": "10.2.0",
+    "nyc": "15.1.0",
+    "rimraf": "5.0.5",
+    "ts-node": "10.9.1",
+    "typescript": "5.2.2",
+    "vitepress": "1.0.0-rc.21"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8 <9"
+  },
+  "lint-staged": {
+    "*.{js,cjs,ts,vue,yml,json,md}": "eslint"
+  }
+}
