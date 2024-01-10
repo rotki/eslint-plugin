@@ -1,14 +1,22 @@
 {
   "name": "@rotki/eslint-plugin",
   "version": "0.0.1",
-  "packageManager": "pnpm@8.14.0",
+  "packageManager": "pnpm@8.14.1",
   "type": "commonjs",
   "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/rotki/eslint-plugin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rotki/eslint-plugin.git"
+  },
   "author": "Rotki Solutions GmbH <info@rotki.com>",
   "files": [
     "dist"
   ],
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf .nyc_output coverage dist docs/.vitepress/dist",
     "coverage": "nyc report --reporter lcov && opener coverage/lcov-report/index.html",
