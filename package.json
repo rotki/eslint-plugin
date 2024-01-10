@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "tsc --project ./tsconfig.build.json",
-    "prepublishOnly": "nr build",
+    "prepublishOnly": "pnpm run build",
     "test": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
     "test:debug": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
     "test:coverage": "nyc mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\" --timeout 60000",
