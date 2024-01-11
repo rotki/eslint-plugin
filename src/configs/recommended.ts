@@ -2,7 +2,7 @@
 export = {
   extends: [require.resolve('./base')],
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2022,
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
@@ -13,6 +13,6 @@ export = {
     es6: true,
   },
   rules: {
-    '@rotki/no-deprecated-classes': 'warn',
+    '@rotki/no-deprecated-classes': 'warn' as const,
   },
 };

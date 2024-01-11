@@ -17,7 +17,7 @@ async function main() {
 export = {
   extends: [require.resolve('./base')],
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2022,
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true
@@ -30,7 +30,7 @@ export = {
   rules: {
     ${rules
       .filter((rule) => rule.recommended)
-      .map((rule) => `'${rule.id}': 'warn',`)
+      .map((rule) => `'${rule.id}': 'warn' as const,`)
       .join('\n        ')}
   },
 }`,

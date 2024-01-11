@@ -1,7 +1,7 @@
 ---
 title: '@rotki/no-deprecated-classes'
 description: disallow the usage of vuetify css classes since they are replaced with tailwindcss
-since: 0.1.0
+since: 0.0.1
 ---
 
 # @rotki/no-deprecated-classes
@@ -19,22 +19,22 @@ This rule reports usages of deprecated css classes in the code.
 
 ```vue
 <!-- ✓ GOOD -->
-<template><div class="flex flex-col"/></template>
+<template><div class="flex flex-col" /></template>
 
-<template><div class="block"/></template>
+<template><div class="block" /></template>
 
-<template><div class="grow"/></template>
+<template><div class="grow" /></template>
 
-<template><div class="justify-between"/></template>
+<template><div class="justify-between" /></template>
 
 <!-- ✗ BAD -->
-<template><div class="d-flex flex-column"/></template>
+<template><div class="d-flex flex-column" /></template>
 
-<template><div class="d-block"/></template>
+<template><div class="d-block" /></template>
 
-<template><div class="grow"/></template>
+<template><div class="grow" /></template>
 
-<template><div class="justify-space-between"/></template>
+<template><div class="justify-space-between" /></template>
 ```
 
 </eslint-code-block>
@@ -49,7 +49,7 @@ This rule reports usages of deprecated css classes in the code.
 
 ## :rocket: Version
 
-This rule was introduced in @rotki/eslint-plugin v0.1.0
+This rule was introduced in @rotki/eslint-plugin v0.0.1
 
 ## :mag: Implementation
 
