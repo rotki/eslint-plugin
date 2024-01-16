@@ -8,9 +8,10 @@ import rules, { type RuleInfo } from './lib/rules';
 
 const PLACE_HOLDER = /#[^\n]*\n+> .+\n+(?:- .+\n)*\n*/u;
 
-const prettierrc = JSON.parse(
-  readFileSync(join(__dirname, '../.prettierrc.json'), 'utf8'),
-) as Options;
+const prettierrc: Options = {
+  semi: true,
+  singleQuote: true,
+};
 
 async function pickSince(content: string): Promise<string | null> {
   const fileIntro = /^---\n(?<content>[\s\S]+?)---\n*/u.exec(content);

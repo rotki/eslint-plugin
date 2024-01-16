@@ -24,32 +24,32 @@ This rule reports usages of deprecated css classes in the code.
 </template>
 
 <template>
-<div class="block" />
+  <div class="block" />
 </template>
 
 <template>
-<div class="grow" />
+  <div class="grow" />
 </template>
 
 <template>
-<div class="justify-between" />
+  <div class="justify-between" />
 </template>
 
 <!-- ✗ BAD -->
 <template>
-<div class="d-flex flex-column" />
+  <div class="d-flex flex-column" />
 </template>
 
 <template>
-<div class="d-block" />
+  <div class="d-block" />
 </template>
 
 <template>
-<div class="grow" />
+  <div class="grow" />
 </template>
 
 <template>
-<div class="justify-space-between" />
+  <div class="justify-space-between" />
 </template>
 ```
 

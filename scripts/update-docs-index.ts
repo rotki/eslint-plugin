@@ -1,14 +1,15 @@
 /**
  * Forked from https://github.com/intlify/eslint-plugin-vue-i18n/blob/master/scripts/update-docs-index.ts
  */
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { type Options, format } from 'prettier';
 import { type RuleInfo, withCategories } from './lib/rules';
 
-const prettierrc = JSON.parse(
-  readFileSync(join(__dirname, '../.prettierrc.json'), 'utf8'),
-) as Options;
+const prettierrc: Options = {
+  semi: true,
+  singleQuote: true,
+};
 
 function toTableRow(rule: RuleInfo) {
   const mark = `${rule.recommended ? ':star:' : ''}${
