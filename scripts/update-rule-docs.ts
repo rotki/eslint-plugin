@@ -4,8 +4,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { type Options, format } from 'prettier';
-import rules from './lib/rules';
-import type { RuleInfo } from './lib/rules';
+import rules, { type RuleInfo } from './lib/rules';
+
 const PLACE_HOLDER = /#[^\n]*\n+> .+\n+(?:- .+\n)*\n*/u;
 
 const prettierrc = JSON.parse(
@@ -18,9 +18,8 @@ async function pickSince(content: string): Promise<string | null> {
     const since = /since: "?(?<version>v\d+\.\d+\.\d+)"?/u.exec(
       fileIntro.groups!.content,
     );
-    if (since) {
+    if (since)
       return since.groups!.version;
-    }
   }
   // if (process.env.IN_VERSION_CI_SCRIPT) {
   //   return getNewVersion().then((v) => `v${v}`);
@@ -53,6 +52,7 @@ class DocFile {
       }),
     );
   }
+
   updateFileIntro() {
     const rule = this.rule;
 
@@ -64,16 +64,15 @@ class DocFile {
       ...(this.since ? { since: this.since } : {}),
     };
     const computed = `---\n${Object.entries(fileIntro)
-      .map((item) => `${item[0]}: ${item[1]}`)
+      .map(item => `${item[0]}: ${item[1]}`)
       .join('\n')}\n---\n\n`;
 
     const fileIntroPattern = /^---\n(.*\n)+?---\n*/g;
 
-    if (fileIntroPattern.test(this.content)) {
+    if (fileIntroPattern.test(this.content))
       this.content = this.content.replace(fileIntroPattern, computed);
-    } else {
+    else
       this.content = `${computed}${this.content.trim()}\n`;
-    }
 
     return this;
   }
@@ -82,21 +81,22 @@ class DocFile {
     const rule = this.rule;
     const headerLines = [`# ${rule.id}`, '', `> ${rule.description}`];
 
-    if (rule.recommended || rule.deprecated || rule.fixable) {
+    if (rule.recommended || rule.deprecated || rule.fixable)
       headerLines.push('');
-    }
 
     if (rule.deprecated) {
       if (rule.replacedBy) {
         headerLines.push(
           `- :warning:️ This rule was **deprecated** and replaced by ${rule.replacedBy
-            .map((id) => `[${id}](${id}.md) rule`)
+            .map(id => `[${id}](${id}.md) rule`)
             .join(', ')}.`,
         );
-      } else {
+      }
+      else {
         headerLines.push(`- :warning:️ This rule was **deprecated**.`);
       }
-    } else if (rule.recommended) {
+    }
+    else if (rule.recommended) {
       headerLines.push(
         '- :star: The `"extends": "plugin:@rotki/recommended"` property in a configuration file enables this rule.',
       );
@@ -150,11 +150,10 @@ This rule was introduced in \`@rotki/eslint-plugin\` ${this.since}
 - [Rule source](https://github.com/rotki/eslint-plugin/blob/master/src/rules/${name}.ts)
 - [Test source](https://github.com/rotki/eslint-plugin/tree/master/tests/rules/${name}.ts)
 `;
-    if (footerPattern.test(this.content)) {
+    if (footerPattern.test(this.content))
       this.content = this.content.replace(footerPattern, footer);
-    } else {
+    else
       this.content = `${this.content.trim()}\n\n${footer}`;
-    }
 
     return this;
   }

@@ -19,22 +19,38 @@ This rule reports usages of deprecated css classes in the code.
 
 ```vue
 <!-- ✓ GOOD -->
-<template><div class="flex flex-col" /></template>
+<template>
+  <div class="flex flex-col" />
+</template>
 
-<template><div class="block" /></template>
+<template>
+<div class="block" />
+</template>
 
-<template><div class="grow" /></template>
+<template>
+<div class="grow" />
+</template>
 
-<template><div class="justify-between" /></template>
+<template>
+<div class="justify-between" />
+</template>
 
 <!-- ✗ BAD -->
-<template><div class="d-flex flex-column" /></template>
+<template>
+<div class="d-flex flex-column" />
+</template>
 
-<template><div class="d-block" /></template>
+<template>
+<div class="d-block" />
+</template>
 
-<template><div class="grow" /></template>
+<template>
+<div class="grow" />
+</template>
 
-<template><div class="justify-space-between" /></template>
+<template>
+<div class="justify-space-between" />
+</template>
 ```
 
 </eslint-code-block>

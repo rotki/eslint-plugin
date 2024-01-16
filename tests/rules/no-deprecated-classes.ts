@@ -1,5 +1,6 @@
 import { RuleTester } from 'eslint';
 import rule from '../../src/rules/no-deprecated-classes';
+
 const vueParser = require.resolve('vue-eslint-parser');
 
 const tester = new RuleTester({

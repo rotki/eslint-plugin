@@ -26,10 +26,10 @@ export interface RuleListener {
     | ((codePath: Rule.CodePath, node: never) => void)
     | ((segment: Rule.CodePathSegment, node: never) => void)
     | ((
-        fromSegment: Rule.CodePathSegment,
-        toSegment: Rule.CodePathSegment,
-        node: never,
-      ) => void)
+      fromSegment: Rule.CodePathSegment,
+      toSegment: Rule.CodePathSegment,
+      node: never,
+    ) => void)
     | undefined;
 }
 
@@ -41,7 +41,7 @@ export interface VueParserServices {
   ) => RuleListener;
   defineCustomBlocksVisitor?: (
     context: RuleContext,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     parser: { parseForESLint: (code: string, options: any) => any },
     rule: {
       target:

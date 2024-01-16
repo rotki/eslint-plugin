@@ -29,8 +29,8 @@ export = {
   },
   rules: {
     ${rules
-      .filter((rule) => rule.recommended)
-      .map((rule) => `'${rule.id}': 'warn' as const,`)
+      .filter(rule => rule.recommended)
+      .map(rule => `'${rule.id}': 'warn' as const,`)
       .join('\n        ')}
   },
 }`,

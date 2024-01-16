@@ -38,7 +38,7 @@
     "eslint": "^8.0.0"
   },
   "dependencies": {
-    "@typescript-eslint/utils": "6.18.1",
+    "@typescript-eslint/utils": "6.19.0",
     "jsonc-eslint-parser": "2.4.0",
     "vue-eslint-parser": "9.4.0",
     "yaml-eslint-parser": "1.2.2"
@@ -46,12 +46,12 @@
   "devDependencies": {
     "@commitlint/cli": "18.4.4",
     "@commitlint/config-conventional": "18.4.4",
-    "@rotki/eslint-config": "1.1.2",
-    "@types/eslint": "8.56.1",
-    "@types/node": "18",
-    "@typescript-eslint/eslint-plugin": "6.18.1",
-    "@typescript-eslint/parser": "6.18.1",
-    "@typescript-eslint/rule-tester": "6.18.1",
+    "@rotki/eslint-config": "2.2.0",
+    "@types/eslint": "8.56.2",
+    "@types/node": "20",
+    "@typescript-eslint/eslint-plugin": "6.19.0",
+    "@typescript-eslint/parser": "6.19.0",
+    "@typescript-eslint/rule-tester": "6.19.0",
     "bumpp": "9.2.1",
     "eslint": "8.56.0",
     "husky": "8.0.3",
@@ -61,7 +61,7 @@
     "rimraf": "5.0.5",
     "ts-node": "10.9.2",
     "typescript": "5.3.3",
-    "vitepress": "1.0.0-rc.36"
+    "vitepress": "1.0.0-rc.39"
   },
   "engines": {
     "node": ">=18.0.0",

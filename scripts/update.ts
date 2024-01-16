@@ -9,6 +9,7 @@ import './update-docs-index';
 
 // recommended rules.
 import './update-recommended-rules';
+
 updateRuleDocs();
 
 main();

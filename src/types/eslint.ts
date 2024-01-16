@@ -33,7 +33,7 @@ export interface MaybeToken extends MaybeNode {
 
 export interface RuleContext {
   id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   options: any[];
   settings: object;
   parserPath: string;
@@ -104,19 +104,19 @@ export type CursorWithSkipOptions =
   | number
   | FilterPredicate
   | {
-      includeComments?: boolean;
-      filter?: FilterPredicate;
-      skip?: number;
-    };
+    includeComments?: boolean;
+    filter?: FilterPredicate;
+    skip?: number;
+  };
 
 export type CursorWithCountOptions =
   | number
   | FilterPredicate
   | {
-      includeComments?: boolean;
-      filter?: FilterPredicate;
-      count?: number;
-    };
+    includeComments?: boolean;
+    filter?: FilterPredicate;
+    count?: number;
+  };
 
 export interface SourceCode extends TokenStore {
   text: string;
@@ -203,39 +203,39 @@ export interface Reference {
 export type DefinitionType =
   | { type: 'CatchClause'; node: VAST.ESLintCatchClause; parent: null }
   | {
-      type: 'ClassName';
-      node: VAST.ESLintClassDeclaration | VAST.ESLintClassExpression;
-      parent: null;
-    }
+    type: 'ClassName';
+    node: VAST.ESLintClassDeclaration | VAST.ESLintClassExpression;
+    parent: null;
+  }
   | {
-      type: 'FunctionName';
-      node: VAST.ESLintFunctionDeclaration | VAST.ESLintFunctionExpression;
-      parent: null;
-    }
+    type: 'FunctionName';
+    node: VAST.ESLintFunctionDeclaration | VAST.ESLintFunctionExpression;
+    parent: null;
+  }
   | { type: 'ImplicitGlobalVariable'; node: VAST.ESLintProgram; parent: null }
   | {
-      type: 'ImportBinding';
-      node:
-        | VAST.ESLintImportSpecifier
-        | VAST.ESLintImportDefaultSpecifier
-        | VAST.ESLintImportNamespaceSpecifier;
-      parent: VAST.ESLintImportDeclaration;
-    }
+    type: 'ImportBinding';
+    node:
+      | VAST.ESLintImportSpecifier
+      | VAST.ESLintImportDefaultSpecifier
+      | VAST.ESLintImportNamespaceSpecifier;
+    parent: VAST.ESLintImportDeclaration;
+  }
   | {
-      type: 'Parameter';
-      node:
-        | VAST.ESLintFunctionDeclaration
-        | VAST.ESLintFunctionExpression
-        | VAST.ESLintArrowFunctionExpression;
-      parent: null;
-    }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: 'Parameter';
+    node:
+      | VAST.ESLintFunctionDeclaration
+      | VAST.ESLintFunctionExpression
+      | VAST.ESLintArrowFunctionExpression;
+    parent: null;
+  }
+
   | { type: 'TDZ'; node: any; parent: null }
   | {
-      type: 'Variable';
-      node: VAST.ESLintVariableDeclarator;
-      parent: VAST.ESLintVariableDeclaration;
-    };
+    type: 'Variable';
+    node: VAST.ESLintVariableDeclarator;
+    parent: VAST.ESLintVariableDeclaration;
+  };
 
 export type Definition = DefinitionType & { name: VAST.ESLintIdentifier };
 
@@ -243,10 +243,10 @@ export interface VisitorKeys {
   [type: string]: string[];
 }
 
-export type RuleModule = {
+export interface RuleModule {
   create(context: RuleContext): RuleListener;
   meta: RuleMetaData;
-};
+}
 
 export interface RuleMetaData {
   docs: {

@@ -37,7 +37,7 @@ export default defineConfig({
       ...withCategories.map(({ category, rules }) => ({
         text: `Rules in ${category}`,
         collapsed: false,
-        items: rules.map((rule) => ({
+        items: rules.map(rule => ({
           text: rule.name,
           link: `/rules/${rule.name}`,
         })),

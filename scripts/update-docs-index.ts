@@ -4,8 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { type Options, format } from 'prettier';
-import { withCategories } from './lib/rules';
-import type { RuleInfo } from './lib/rules';
+import { type RuleInfo, withCategories } from './lib/rules';
 
 const prettierrc = JSON.parse(
   readFileSync(join(__dirname, '../.prettierrc.json'), 'utf8'),

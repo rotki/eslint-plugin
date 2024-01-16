@@ -1,11 +1,11 @@
 import { extname } from 'node:path';
-import {
-  type RuleContext,
-  type RuleListener,
-  type TemplateListener,
+import type {
+  RuleContext,
+  RuleListener,
+  TemplateListener,
 } from '../types';
 
-const UNEXPECTED_ERROR_LOCATION = { line: 1, column: 0 };
+const UNEXPECTED_ERROR_LOCATION = { column: 0, line: 1 };
 
 /**
  * Register the given visitor to parser services.

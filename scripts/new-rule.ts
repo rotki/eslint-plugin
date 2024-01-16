@@ -4,6 +4,8 @@
 import { resolve } from 'node:path';
 import { writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
+import process from 'node:process';
+
 const logger = console;
 
 // main
@@ -14,7 +16,7 @@ const logger = console;
     return;
   }
   if (!/^[\w-]+$/u.test(ruleId)) {
-    logger.error("Invalid RuleID '%s'.", ruleId);
+    logger.error('Invalid RuleID \'%s\'.', ruleId);
     process.exitCode = 1;
     return;
   }
