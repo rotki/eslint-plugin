@@ -1,6 +1,6 @@
-const rotki = require('@rotki/eslint-config').default;
+import rotki from '@rotki/eslint-config';
 
-module.exports = rotki({
+export default rotki({
   typescript: {
     tsconfigPath: 'tsconfig.json',
   },
@@ -24,7 +24,7 @@ module.exports = rotki({
     'unicorn/prefer-top-level-await': 'off',
   },
 }, {
-  files: ['**/.vitepress/config.mts'],
+  files: ['**/*.?([cm])ts'],
   rules: {
     'import/no-default-export': 'off',
   },

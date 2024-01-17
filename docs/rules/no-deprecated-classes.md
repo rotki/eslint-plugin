@@ -1,7 +1,7 @@
 ---
 title: '@rotki/no-deprecated-classes'
 description: disallow the usage of vuetify css classes since they are replaced with tailwindcss
-since: 0.0.1
+since: v0.0.1
 ---
 
 # @rotki/no-deprecated-classes
@@ -65,7 +65,7 @@ This rule reports usages of deprecated css classes in the code.
 
 ## :rocket: Version
 
-This rule was introduced in @rotki/eslint-plugin v0.0.1
+This rule was introduced in `@rotki/eslint-plugin` v0.0.1
 
 ## :mag: Implementation
 

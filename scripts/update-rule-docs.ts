@@ -3,8 +3,9 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import * as url from 'node:url';
 import { type Options, format } from 'prettier';
-import rules, { type RuleInfo } from './lib/rules';
+import { type RuleInfo, rules } from './utils';
 
 const PLACE_HOLDER = /#[^\n]*\n+> .+\n+(?:- .+\n)*\n*/u;
 
@@ -13,7 +14,7 @@ const prettierrc: Options = {
   singleQuote: true,
 };
 
-async function pickSince(content: string): Promise<string | null> {
+function pickSince(content: string): string | null {
   const fileIntro = /^---\n(?<content>[\s\S]+?)---\n*/u.exec(content);
   if (fileIntro) {
     const since = /since: "?(?<version>v\d+\.\d+\.\d+)"?/u.exec(
@@ -22,9 +23,6 @@ async function pickSince(content: string): Promise<string | null> {
     if (since)
       return since.groups!.version;
   }
-  // if (process.env.IN_VERSION_CI_SCRIPT) {
-  //   return getNewVersion().then((v) => `v${v}`);
-  // }
   return null;
 }
 
@@ -35,12 +33,13 @@ class DocFile {
   private since: string | null = null;
   constructor(rule: RuleInfo) {
     this.rule = rule;
-    this.filePath = join(__dirname, `../docs/rules/${rule.name}.md`);
+    const dirname = url.fileURLToPath(new URL('.', import.meta.url));
+    this.filePath = join(dirname, `../docs/rules/${rule.name}.md`);
     this.content = readFileSync(this.filePath, 'utf8');
   }
 
-  async init() {
-    this.since = await pickSince(this.content);
+  init() {
+    this.since = pickSince(this.content);
     return this;
   }
 
@@ -162,7 +161,7 @@ This rule was introduced in \`@rotki/eslint-plugin\` ${this.since}
 
 export async function updateRuleDocs(): Promise<void> {
   for (const rule of rules) {
-    const doc = await new DocFile(rule).init();
+    const doc = new DocFile(rule).init();
     await doc
       .updateFileIntro()
       .updateHeader()
@@ -171,3 +170,5 @@ export async function updateRuleDocs(): Promise<void> {
       .write();
   }
 }
+
+await updateRuleDocs();

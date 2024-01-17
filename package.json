@@ -2,7 +2,7 @@
   "name": "@rotki/eslint-plugin",
   "version": "0.0.3",
   "packageManager": "pnpm@8.14.1",
-  "type": "commonjs",
+  "type": "module",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/rotki/eslint-plugin/issues"
@@ -15,53 +15,63 @@
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "sideEffects": false,
   "scripts": {
     "clean": "rimraf .nyc_output coverage dist docs/.vitepress/dist",
     "coverage": "nyc report --reporter lcov && opener coverage/lcov-report/index.html",
-    "generate": "ts-node scripts/update.ts",
+    "generate": "node --experimental-specifier-resolution=node --loader ts-node/esm scripts/update-rule-docs.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build": "tsc --project ./tsconfig.build.json",
+    "build": "unbuild",
+    "dev": "unbuild --stub",
     "prepublishOnly": "pnpm run build",
-    "test": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
-    "test:debug": "mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\"",
-    "test:coverage": "nyc mocha --require ts-node/register/transpile-only \"./tests/**/*.ts\" --timeout 60000",
-    "new": "ts-node ./scripts/new-rule.ts",
+    "test": "vitest",
+    "new": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/new-rule.ts",
     "docs": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "prepare": "husky install",
+    "typecheck": "tsc --noEmit",
     "release": "bumpp -r --no-push"
   },
   "peerDependencies": {
-    "eslint": "^8.0.0"
+    "eslint": "^8.0.0 || ^9.0.0"
   },
   "dependencies": {
     "@typescript-eslint/utils": "6.19.0",
+    "eslint-compat-utils": "0.4.1",
     "jsonc-eslint-parser": "2.4.0",
-    "vue-eslint-parser": "9.4.0",
+    "vue-eslint-parser": "9.4.1",
     "yaml-eslint-parser": "1.2.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "18.4.4",
-    "@commitlint/config-conventional": "18.4.4",
-    "@rotki/eslint-config": "2.2.0",
+    "@commitlint/cli": "18.5.0",
+    "@commitlint/config-conventional": "18.5.0",
+    "@rotki/eslint-config": "2.3.0",
     "@types/eslint": "8.56.2",
     "@types/node": "20",
     "@typescript-eslint/eslint-plugin": "6.19.0",
     "@typescript-eslint/parser": "6.19.0",
     "@typescript-eslint/rule-tester": "6.19.0",
-    "bumpp": "9.2.1",
+    "bumpp": "9.3.0",
     "eslint": "8.56.0",
     "husky": "8.0.3",
     "lint-staged": "15.2.0",
-    "mocha": "10.2.0",
-    "nyc": "15.1.0",
     "rimraf": "5.0.5",
     "ts-node": "10.9.2",
     "typescript": "5.3.3",
-    "vitepress": "1.0.0-rc.39"
+    "unbuild": "2.0.0",
+    "vitepress": "1.0.0-rc.40",
+    "vitest": "1.2.1"
   },
   "engines": {
     "node": ">=18.0.0",
