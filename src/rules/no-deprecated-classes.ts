@@ -1,7 +1,12 @@
-import { defineTemplateBodyVisitor } from '../utils/index';
-import { createRule } from '../utils/rule';
-import type { Range, RuleContext, RuleListener } from '../types';
+import { createEslintRule, defineTemplateBodyVisitor, getSourceCode } from '../utils';
+import type { Range } from '../types';
 import type { AST as VAST } from 'vue-eslint-parser';
+
+export const RULE_NAME = 'no-deprecated-classes';
+
+export type MessageIds = 'replacedWith';
+
+export type Options = [];
 
 type StringReplacer = [string, string];
 
@@ -41,74 +46,72 @@ function isRegex(replacement: Replacer): replacement is RegexReplacer {
   return replacement[0] instanceof RegExp;
 }
 
-function create(context: RuleContext): RuleListener {
-  return defineTemplateBodyVisitor(context, {
-    'VAttribute[key.name="class"]': function (node: VAST.VAttribute) {
-      if (!node.value || !node.value.value)
-        return;
-
-      const classes = node.value.value.split(/\s+/).filter(s => !!s);
-      const source = context.getSourceCode();
-
-      const replaced: StringReplacer[] = [];
-
-      classes.forEach((className) => {
-        for (const replacement of replacements) {
-          if (isString(replacement) && replacement[0] === className)
-            replaced.push([className, replacement[1]]);
-
-          if (isRegex(replacement)) {
-            const matches = (replacement[0].exec(className) || []).slice(1);
-            const replace = replacement[1];
-            if (matches.length > 0 && typeof replace === 'function')
-              return replaced.push([className, replace(matches)]);
-          }
-        }
-      });
-
-      replaced.forEach((replacement) => {
-        if (!node.value)
+export default createEslintRule<Options, MessageIds>({
+  create(context) {
+    return defineTemplateBodyVisitor(context, {
+      'VAttribute[key.name="class"]': function (node: VAST.VAttribute) {
+        if (!node.value || !node.value.value)
           return;
 
-        const idx = node.value.value.indexOf(replacement[0]) + 1;
-        const range: Range = [
-          node.value.range[0] + idx,
-          node.value.range[0] + idx + replacement[0].length,
-        ];
-        const loc = {
-          end: source.getLocFromIndex(range[1]),
-          start: source.getLocFromIndex(range[0]),
-        };
-        context.report({
-          data: {
-            a: replacement[0],
-            b: replacement[1],
-          },
-          fix(fixer) {
-            return fixer.replaceTextRange(range, replacement[1]);
-          },
-          loc,
-          messageId: 'replacedWith',
-        });
-      });
-    },
-  });
-}
+        const classes = node.value.value.split(/\s+/).filter(s => !!s);
+        const source = getSourceCode(context);
 
-export = createRule({
-  create,
+        const replaced: StringReplacer[] = [];
+
+        classes.forEach((className) => {
+          for (const replacement of replacements) {
+            if (isString(replacement) && replacement[0] === className)
+              replaced.push([className, replacement[1]]);
+
+            if (isRegex(replacement)) {
+              const matches = (replacement[0].exec(className) || []).slice(1);
+              const replace = replacement[1];
+              if (matches.length > 0 && typeof replace === 'function')
+                return replaced.push([className, replace(matches)]);
+            }
+          }
+        });
+
+        replaced.forEach((replacement) => {
+          if (!node.value)
+            return;
+
+          const idx = node.value.value.indexOf(replacement[0]) + 1;
+          const range: Range = [
+            node.value.range[0] + idx,
+            node.value.range[0] + idx + replacement[0].length,
+          ];
+          const loc = {
+            end: source.getLocFromIndex(range[1]),
+            start: source.getLocFromIndex(range[0]),
+          };
+          context.report({
+            data: {
+              a: replacement[0],
+              b: replacement[1],
+            },
+            fix(fixer) {
+              return fixer.replaceTextRange(range, replacement[1]);
+            },
+            loc,
+            messageId: 'replacedWith',
+          });
+        });
+      },
+    });
+  },
+  defaultOptions: [],
   meta: {
     docs: {
-      category: 'Recommended',
-      description:
-        'disallow the usage of vuetify css classes since they are replaced with tailwindcss',
-      recommended: true,
-      url: 'https://rotki.github.io/eslint-plugin/rules/no-deprecated-classes',
+      description: 'disallow the usage of vuetify css classes since they are replaced with tailwindcss',
+      recommended: 'recommended',
     },
     fixable: 'code',
     messages: {
       replacedWith: `'{{ a }}' has been replaced with '{{ b }}'`,
     },
+    schema: [],
     type: 'problem',
   },
+  name: RULE_NAME,
 });

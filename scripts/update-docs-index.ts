@@ -4,7 +4,7 @@
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { type Options, format } from 'prettier';
-import { type RuleInfo, withCategories } from './lib/rules';
+import { type RuleInfo, withCategories } from './utils';
 
 const prettierrc: Options = {
   semi: true,

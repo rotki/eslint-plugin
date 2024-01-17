@@ -1,5 +1,5 @@
 import { RuleTester } from 'eslint';
-import rule from '../../src/rules/no-deprecated-classes';
+import rule, { RULE_NAME } from '../../src/rules/no-deprecated-classes';
 
 const vueParser = require.resolve('vue-eslint-parser');
 
@@ -8,7 +8,7 @@ const tester = new RuleTester({
   parserOptions: { ecmaVersion: 2015 },
 });
 
-tester.run('no-deprecated-classes', rule as never, {
+tester.run(RULE_NAME, rule as never, {
   valid: [
     '<template><div class="flex flex-col"/></template>',
     '<template><div class="block"/></template>',

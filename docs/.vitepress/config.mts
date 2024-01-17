@@ -1,7 +1,5 @@
 import { defineConfig } from 'vitepress';
-import { withCategories } from '../../scripts/lib/rules';
-import '../../scripts/update-rule-docs';
-import '../../scripts/update-docs-index';
+import { withCategories } from '../../scripts/utils';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({

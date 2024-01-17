@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import process from 'node:process';
+import url from 'node:url';
 
 const logger = console;
 
@@ -21,28 +22,32 @@ const logger = console;
     return;
   }
 
-  const ruleFile = resolve(__dirname, `../src/rules/${ruleId}.ts`);
-  const testFile = resolve(__dirname, `../tests/rules/${ruleId}.ts`);
-  const docFile = resolve(__dirname, `../docs/rules/${ruleId}.md`);
+  const dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+  const ruleFile = resolve(dirname, `../src/rules/${ruleId}.ts`);
+  const testFile = resolve(dirname, `../tests/rules/${ruleId}.ts`);
+  const docFile = resolve(dirname, `../docs/rules/${ruleId}.md`);
 
   writeFileSync(
     ruleFile,
-    `import type { RuleContext, RuleListener } from '../types'
-import { createRule } from '../utils/rule'
+    `import { createEslintRule } from '../utils'
 
-export = createRule({
+export const RULE_NAME='${ruleId}';
+export type MessageIds='';
+export type Options = [];
+
+export default createEslintRule<Options, MessageIds>({
+  name: RULE_NAME,
   meta: {
     type: '...',
     docs: {
       description: '...',
-      category: 'Best Practices',
-      url: 'https://rotki.github.io/eslint-plugin/rules/${ruleId}.html',
-      recommended: false
     },
     fixable: null,
     schema: []
   },
-  create(context: RuleContext): RuleListener {
+  defaultOptions: [],
+  create(context) {
     return {}
   }
 })
@@ -51,7 +56,7 @@ export = createRule({
   writeFileSync(
     testFile,
     `import { RuleTester } from 'eslint'
-import rule from '../../../src/rules/${ruleId}'
+import rule from '../../src/rules/${ruleId}'
 
 const vueParser = require.resolve('vue-eslint-parser')
 
@@ -132,7 +137,10 @@ This rule reports ???.
 `,
   );
 
-  execSync(`code "${ruleFile}"`);
-  execSync(`code "${testFile}"`);
-  execSync(`code "${docFile}"`);
+  const editor = process.env.LAUNCH_EDITOR;
+  if (editor) {
+    execSync(`${editor} "${ruleFile}"`);
+    execSync(`${editor} "${testFile}"`);
+    execSync(`${editor} "${docFile}"`);
+  }
 })(process.argv[2]);
