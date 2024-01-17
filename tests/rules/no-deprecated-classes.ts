@@ -5,7 +5,7 @@ const vueParser = require.resolve('vue-eslint-parser');
 
 const tester = new RuleTester({
   parser: vueParser,
-  parserOptions: { ecmaVersion: 2015 },
+  parserOptions: { ecmaVersion: 2021, sourceType: 'module' },
 });
 
 tester.run(RULE_NAME, rule as never, {
@@ -70,6 +70,54 @@ tester.run(RULE_NAME, rule as never, {
       code: '<template><div class="text-uppercase"/></template>',
       output: '<template><div class="uppercase"/></template>',
       errors: [{ messageId: 'replacedWith' }],
+    },
+    {
+      code: `
+      <script>
+      export default {
+        data() {
+          return {
+            classA: 'align-self-center',
+            classB: 'text-uppercase',
+            enable: false
+          }
+        }
+      }
+      </script>
+      <template>
+        <div>
+          <span :class="['abc text-uppercase cl', classA]"/>
+          <span :class="{ 'abc text-uppercase cl': true, 'font-weight-bold': true, [classB]: true }"/>
+          <span :class="enable ? 'abc text-uppercase cl' : 'lower'"/>
+        </div>
+      </template>
+      `,
+      output: `
+      <script>
+      export default {
+        data() {
+          return {
+            classA: 'align-self-center',
+            classB: 'text-uppercase',
+            enable: false
+          }
+        }
+      }
+      </script>
+      <template>
+        <div>
+          <span :class="['abc uppercase cl', classA]"/>
+          <span :class="{ 'abc uppercase cl': true, 'font-bold': true, [classB]: true }"/>
+          <span :class="enable ? 'abc uppercase cl' : 'lower'"/>
+        </div>
+      </template>
+      `,
+      errors: [
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+      ],
     },
   ],
 });

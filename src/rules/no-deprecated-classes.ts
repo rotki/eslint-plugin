@@ -1,5 +1,15 @@
-import { createEslintRule, defineTemplateBodyVisitor, getSourceCode } from '../utils';
-import type { Range } from '../types';
+import debugFactory from 'debug';
+import { createEslintRule, defineTemplateBodyVisitor, getSourceCode, getStaticPropertyName } from '../utils';
+import type {
+  ESLintExpression,
+  VExpressionContainer,
+  VFilterSequenceExpression,
+  VForExpression,
+  VGenericExpression,
+  VOnExpression,
+  VSlotScopeExpression,
+} from 'vue-eslint-parser/ast/nodes';
+import type { Range, RuleContext } from '../types';
 import type { AST as VAST } from 'vue-eslint-parser';
 
 export const RULE_NAME = 'no-deprecated-classes';
@@ -7,6 +17,8 @@ export const RULE_NAME = 'no-deprecated-classes';
 export type MessageIds = 'replacedWith';
 
 export type Options = [];
+
+const debug = debugFactory('@rotki/eslint-plugin:no-deprecated-classes');
 
 type StringReplacer = [string, string];
 
@@ -46,57 +58,176 @@ function isRegex(replacement: Replacer): replacement is RegexReplacer {
   return replacement[0] instanceof RegExp;
 }
 
+function findReplacement(className: string): string | undefined {
+  for (const replacement of replacements) {
+    if (isString(replacement) && replacement[0] === className)
+      return replacement[1];
+
+    if (isRegex(replacement)) {
+      const matches = (replacement[0].exec(className) || []).slice(1);
+      const replace = replacement[1];
+      if (matches.length > 0 && typeof replace === 'function')
+        return replace(matches);
+    }
+  }
+  return undefined;
+}
+
+function getRange(node: VAST.VAttribute | ExpressionType | VAST.ESLintTemplateElement): VAST.OffsetRange {
+  if (node.type === 'VAttribute' && node.value && node.value.range)
+    return node.value.range;
+
+  return node.range;
+}
+
+function reportReplacement(
+  className: string,
+  replacement: string,
+  node: VAST.VAttribute | ExpressionType | VAST.ESLintTemplateElement,
+  context: RuleContext<MessageIds, Options>,
+  position: number = 1,
+): void {
+  debug(`found replacement ${replacement} for ${className}`);
+
+  const source = getSourceCode(context);
+
+  const initialRange = getRange(node);
+
+  const range: Range = [
+    initialRange[0] + position,
+    initialRange[0] + position + className.length,
+  ];
+
+  const loc = {
+    end: source.getLocFromIndex(range[1]),
+    start: source.getLocFromIndex(range[0]),
+  };
+
+  context.report({
+    data: {
+      className,
+      replacement,
+    },
+    fix(fixer) {
+      return fixer.replaceTextRange(range, replacement);
+    },
+    loc,
+    messageId: 'replacedWith',
+  });
+}
+
+type ExpressionType =
+  ESLintExpression
+  | VFilterSequenceExpression
+  | VForExpression
+  | VOnExpression
+  | VSlotScopeExpression
+  | VGenericExpression;
+
+interface FoundClass {
+  className: string;
+  reportNode: ExpressionType | VAST.ESLintTemplateElement;
+  position: number;
+}
+
+function* extractClassNames(
+  node: ExpressionType,
+  textOnly: boolean = false,
+): IterableIterator<FoundClass> {
+  if (node.type === 'Literal') {
+    const classNames = `${node.value}`;
+    yield * classNames
+      .split(/\s+/)
+      .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: node }));
+    return;
+  }
+  if (node.type === 'TemplateLiteral') {
+    for (const templateElement of node.quasis) {
+      const classNames = templateElement.value.cooked;
+      if (classNames === null)
+        continue;
+
+      yield * classNames
+        .split(/\s+/)
+        .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: templateElement }));
+    }
+    for (const expr of node.expressions)
+      yield * extractClassNames(expr, true);
+
+    return;
+  }
+  if (node.type === 'BinaryExpression') {
+    if (node.operator !== '+')
+      return;
+
+    yield * extractClassNames(node.left as ESLintExpression, true);
+    yield * extractClassNames(node.right, true);
+    return;
+  }
+  if (textOnly)
+    return;
+
+  if (node.type === 'ObjectExpression') {
+    for (const prop of node.properties) {
+      if (prop.type !== 'Property')
+        continue;
+
+      const classNames = getStaticPropertyName(prop);
+      if (!classNames)
+        continue;
+
+      yield * classNames
+        .split(/\s+/)
+        .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: prop.key }));
+    }
+    return;
+  }
+  if (node.type === 'ArrayExpression') {
+    for (const element of node.elements) {
+      if (element == null)
+        continue;
+
+      if (element.type === 'SpreadElement')
+        continue;
+
+      yield * extractClassNames(element);
+    }
+  }
+
+  if (node.type === 'ConditionalExpression') {
+    yield * extractClassNames(node.consequent);
+    yield * extractClassNames(node.alternate);
+  }
+}
+
 export default createEslintRule<Options, MessageIds>({
   create(context) {
     return defineTemplateBodyVisitor(context, {
-      'VAttribute[key.name="class"]': function (node: VAST.VAttribute) {
+      'VAttribute[directive=false][key.name="class"]': function (node: VAST.VAttribute) {
         if (!node.value || !node.value.value)
           return;
 
-        const classes = node.value.value.split(/\s+/).filter(s => !!s);
-        const source = getSourceCode(context);
+        for (const className of node.value.value.split(/\s+/).filter(s => !!s)) {
+          const replacement = findReplacement(className);
+          const position = node.value.value.indexOf(className) + 1;
 
-        const replaced: StringReplacer[] = [];
+          if (!replacement)
+            continue;
 
-        classes.forEach((className) => {
-          for (const replacement of replacements) {
-            if (isString(replacement) && replacement[0] === className)
-              replaced.push([className, replacement[1]]);
+          reportReplacement(className, replacement, node, context, position);
+        }
+      },
+      'VAttribute[directive=true][key.name.name=\'bind\'][key.argument.name=\'class\'] > VExpressionContainer.value': function (node: VExpressionContainer) {
+        if (!node.expression)
+          return;
 
-            if (isRegex(replacement)) {
-              const matches = (replacement[0].exec(className) || []).slice(1);
-              const replace = replacement[1];
-              if (matches.length > 0 && typeof replace === 'function')
-                return replaced.push([className, replace(matches)]);
-            }
-          }
-        });
+        for (const { className, position, reportNode } of extractClassNames(node.expression)) {
+          const replacement = findReplacement(className);
+          if (!replacement)
+            continue;
 
-        replaced.forEach((replacement) => {
-          if (!node.value)
-            return;
-
-          const idx = node.value.value.indexOf(replacement[0]) + 1;
-          const range: Range = [
-            node.value.range[0] + idx,
-            node.value.range[0] + idx + replacement[0].length,
-          ];
-          const loc = {
-            end: source.getLocFromIndex(range[1]),
-            start: source.getLocFromIndex(range[0]),
-          };
-          context.report({
-            data: {
-              a: replacement[0],
-              b: replacement[1],
-            },
-            fix(fixer) {
-              return fixer.replaceTextRange(range, replacement[1]);
-            },
-            loc,
-            messageId: 'replacedWith',
-          });
-        });
+          reportReplacement(className, replacement, reportNode, context, position);
+        }
       },
     });
   },
@@ -108,7 +239,7 @@ export default createEslintRule<Options, MessageIds>({
     },
     fixable: 'code',
     messages: {
-      replacedWith: `'{{ a }}' has been replaced with '{{ b }}'`,
+      replacedWith: `'{{ className }}' has been replaced with '{{ replacement }}'`,
     },
     schema: [],
     type: 'problem',
