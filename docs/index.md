@@ -12,3 +12,4 @@ hero:
         - theme: alt
           text: Get started
           link: /started
+---

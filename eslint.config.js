@@ -5,6 +5,7 @@ export default rotki({
     tsconfigPath: 'tsconfig.json',
   },
   stylistic: true,
+  formatters: true,
 }, {
   files: ['src/**/*.ts'],
   rules: {

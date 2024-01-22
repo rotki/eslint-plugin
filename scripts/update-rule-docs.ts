@@ -5,7 +5,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as url from 'node:url';
 import { type Options, format } from 'prettier';
+import createDebug from 'debug';
 import { type RuleInfo, rules } from './utils';
+
+const debug = createDebug('@rotki/eslint-plugin:update-rule-docs');
 
 const PLACE_HOLDER = /#[^\n]*\n+> .+\n+(?:- .+\n)*\n*/u;
 
@@ -79,13 +82,16 @@ class DocFile {
 
   updateHeader() {
     const rule = this.rule;
+    debug(`updating rule '${rule.name}; header`);
     const headerLines = [`# ${rule.id}`, '', `> ${rule.description}`];
 
     if (rule.recommended || rule.deprecated || rule.fixable)
       headerLines.push('');
 
     if (rule.deprecated) {
+      debug(`marking rule ${rule.name} as deprecated`);
       if (rule.replacedBy) {
+        debug(`marking rule ${rule.name} as replaced`);
         headerLines.push(
           `- :warning:️ This rule was **deprecated** and replaced by ${rule.replacedBy
             .map(id => `[${id}](${id}.md) rule`)
@@ -97,12 +103,14 @@ class DocFile {
       }
     }
     else if (rule.recommended) {
+      debug(`marking rule ${rule.name} as recommended`);
       headerLines.push(
         '- :star: The `"extends": "plugin:@rotki/recommended"` property in a configuration file enables this rule.',
       );
     }
 
     if (rule.fixable) {
+      debug(`marking rule ${rule.name} as fixable`);
       headerLines.push(
         '- :black_nib:️ The `--fix` option on the [command line](http://eslint.org/docs/user-guide/command-line-interface#fix) can automatically fix some of the problems reported by this rule.',
       );

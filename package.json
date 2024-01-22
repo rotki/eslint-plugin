@@ -38,7 +38,7 @@
     "test": "vitest",
     "new": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/new-rule.ts",
     "docs": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:build": "pnpm run generate && vitepress build docs",
     "prepare": "husky install",
     "typecheck": "tsc --noEmit",
     "release": "bumpp -r --no-push"
@@ -48,8 +48,10 @@
   },
   "dependencies": {
     "@typescript-eslint/utils": "6.19.0",
+    "debug": "4.3.4",
     "eslint-compat-utils": "0.4.1",
     "jsonc-eslint-parser": "2.4.0",
+    "scule": "1.2.0",
     "vue-eslint-parser": "9.4.1",
     "yaml-eslint-parser": "1.2.2"
   },
@@ -57,6 +59,7 @@
     "@commitlint/cli": "18.5.0",
     "@commitlint/config-conventional": "18.5.0",
     "@rotki/eslint-config": "2.3.0",
+    "@types/debug": "4.1.12",
     "@types/eslint": "8.56.2",
     "@types/node": "20",
     "@typescript-eslint/eslint-plugin": "6.19.0",

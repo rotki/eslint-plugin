@@ -7,6 +7,7 @@ pnpm install --D --save-exact eslint @rotki/eslint-plugin
 ```
 
 ### Requirements
+
 - ESLint 8.x
 - NodeJS 18.x
 

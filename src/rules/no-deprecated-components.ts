@@ -1,0 +1,99 @@
+import createDebug from 'debug';
+import { pascalCase, snakeCase } from 'scule';
+import { createEslintRule, defineTemplateBodyVisitor, getSourceCode } from '../utils';
+import type { VElement } from 'vue-eslint-parser/ast';
+
+const debug = createDebug('@rotki/eslint-plugin:no-deprecated-components');
+
+export const RULE_NAME = 'no-deprecated-components';
+
+export type MessageIds = 'removed' | 'replacedWith' | 'deprecated';
+
+export type Options = [{ legacy: boolean }];
+
+const replacements = {
+  DataTable: true,
+  Fragment: false,
+} as const;
+
+const skipInLegacy = [
+  'Fragment',
+];
+
+function hasReplacement(tag: string): tag is (keyof typeof replacements) {
+  return Object.prototype.hasOwnProperty.call(replacements, tag);
+}
+
+export default createEslintRule<Options, MessageIds>({
+  create(context, optionsWithDefault) {
+    const options = optionsWithDefault[0] || {};
+    const legacy = options.legacy;
+    return defineTemplateBodyVisitor(context, {
+      VElement(element: VElement) {
+        const tag = pascalCase(element.rawName);
+
+        const sourceCode = getSourceCode(context);
+        if (!('getTemplateBodyTokenStore' in sourceCode.parserServices))
+          throw new Error('cannot find getTemplateBodyTokenStore in parserServices');
+
+        if (!hasReplacement(tag))
+          return;
+
+        const replacement = replacements[tag];
+
+        if (replacement || (legacy && skipInLegacy.includes(tag))) {
+          debug(`${tag} has been deprecated`);
+          context.report({
+            data: {
+              name: snakeCase(tag),
+            },
+            messageId: 'deprecated',
+            node: element,
+          });
+        }
+        else {
+          debug(`${tag} has will be removed`);
+          context.report({
+            data: {
+              name: snakeCase(tag),
+            },
+            fix(fixer) {
+              return [
+                fixer.remove(element.startTag),
+                ...(element.endTag ? [fixer.remove(element.endTag)] : []),
+              ];
+            },
+            messageId: 'removed',
+            node: element,
+          });
+        }
+      },
+    });
+  },
+  defaultOptions: [{ legacy: false }],
+  meta: {
+    docs: {
+      description: 'Removes deprecated classes that do not exist anymore',
+      recommended: 'recommended',
+    },
+    fixable: 'code',
+    messages: {
+      deprecated: `'{{ name }}' has been deprecated`,
+      removed: `'{{ name }}' has been removed`,
+      replacedWith: `'{{ a }}' has been replaced with '{{ b }}'`,
+    },
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          legacy: {
+            type: 'boolean',
+          },
+        },
+        type: 'object',
+      },
+    ],
+    type: 'problem',
+  },
+  name: RULE_NAME,
+});

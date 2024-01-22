@@ -1,5 +1,11 @@
-import type { RuleContext, RuleListener, RuleModule } from '../types';
-import type { RuleWithMeta, RuleWithMetaAndName } from '@typescript-eslint/utils/eslint-utils';
+import type {
+  PluginRuleModule,
+  RuleContext,
+  RuleListener,
+  RuleModule,
+  RuleWithMeta,
+  RuleWithMetaAndName,
+} from '../types';
 
 const blobUrl = 'https://rotki.github.io/eslint-plugin/rules/';
 
@@ -19,7 +25,7 @@ function RuleCreator(urlCreator: (ruleName: string) => string) {
     meta,
       name,
       ...rule
-  }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>): RuleModule<TOptions> {
+  }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>): RuleModule<TMessageIds, TOptions> {
     return createRule<TOptions, TMessageIds>({
       meta: {
         ...meta,
@@ -46,7 +52,7 @@ function createRule<
   create,
   defaultOptions,
   meta,
-}: Readonly<RuleWithMeta<TOptions, TMessageIds>>): RuleModule<TOptions> {
+}: Readonly<RuleWithMeta<TOptions, TMessageIds>>): RuleModule<TMessageIds, TOptions> {
   return {
     create: ((
       context: Readonly<RuleContext<TMessageIds, TOptions>>,
@@ -64,4 +70,4 @@ function createRule<
 
 export const createEslintRule = RuleCreator(
   ruleName => `${blobUrl}${ruleName}`,
-) as any as <TOptions extends readonly unknown[], TMessageIds extends string>({ meta, name, ...rule }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>) => RuleModule<TOptions>;
+) as any as <TOptions extends readonly unknown[], TMessageIds extends string>({ meta, name, ...rule }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>) => PluginRuleModule<TOptions>;

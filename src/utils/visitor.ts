@@ -1,7 +1,6 @@
 import { extname } from 'node:path';
 import { getFilename, getSourceCode } from './compat';
-import type { RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
-import type { ReportDescriptor } from '@typescript-eslint/utils/ts-eslint';
+import type { ReportDescriptor, RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
 
 /**
  * Register the given visitor to parser services. from GitHub `vuejs/eslint-plugin-vue` repo
