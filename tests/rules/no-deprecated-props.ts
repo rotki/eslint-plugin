@@ -31,7 +31,7 @@ tester.run('no-deprecated-props', rule as never, {
   invalid: [
     {
       filename: 'test.vue',
-      code: `     
+      code: `
         <script lang="ts">
         const val = ref('')         
         </script>
@@ -41,7 +41,7 @@ tester.run('no-deprecated-props', rule as never, {
             <RuiRadio internal-value="ok"/>
           </div>
         </template>
-      `.trim(),
+      `,
       output: `
         <script lang="ts">
         const val = ref('')         
@@ -52,7 +52,7 @@ tester.run('no-deprecated-props', rule as never, {
             <RuiRadio value="ok"/>
           </div>
         </template>
-      `.trim(),
+      `,
       errors: [
         {
           messageId: 'replacedWith',
