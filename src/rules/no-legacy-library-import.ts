@@ -13,12 +13,14 @@ export default createEslintRule<Options, MessageIds>({
   create(context) {
     return {
       ImportDeclaration(node) {
-        if (node.source.value !== legacyLibrary)
+        if (!node.source.value.startsWith(legacyLibrary))
           return;
+
+        const replacement = node.source.value.replace(legacyLibrary, newLibrary);
 
         context.report({
           fix(fixer) {
-            return fixer.replaceText(node.source, `'${newLibrary}'`);
+            return fixer.replaceText(node.source, `'${replacement}'`);
           },
           messageId: 'replacedWith',
           node: node.source,

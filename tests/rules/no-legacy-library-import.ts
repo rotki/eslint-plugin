@@ -62,5 +62,20 @@ tester.run('no-legacy-library-import', rule as never, {
         `,
       errors: [{ messageId: 'replacedWith' }],
     },
+
+    {
+      filename: 'test.ts',
+      code: `
+        import { DataTableHeader } from '@rotki/ui-library-compat/style.css';
+        
+        const test = 1;
+        `,
+      output: `
+        import { DataTableHeader } from '@rotki/ui-library/style.css';
+        
+        const test = 1;
+        `,
+      errors: [{ messageId: 'replacedWith' }],
+    },
   ],
 });
