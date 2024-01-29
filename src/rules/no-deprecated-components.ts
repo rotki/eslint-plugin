@@ -1,5 +1,5 @@
 import createDebug from 'debug';
-import { pascalCase, snakeCase } from 'scule';
+import { pascalCase } from 'scule';
 import { createEslintRule, defineTemplateBodyVisitor, getSourceCode } from '../utils';
 import type { VElement } from 'vue-eslint-parser/ast';
 
@@ -45,7 +45,7 @@ export default createEslintRule<Options, MessageIds>({
           debug(`${tag} has been deprecated`);
           context.report({
             data: {
-              name: snakeCase(tag),
+              name: tag,
             },
             messageId: 'deprecated',
             node: element,
@@ -55,7 +55,7 @@ export default createEslintRule<Options, MessageIds>({
           debug(`${tag} has will be removed`);
           context.report({
             data: {
-              name: snakeCase(tag),
+              name: tag,
             },
             fix(fixer) {
               return [
