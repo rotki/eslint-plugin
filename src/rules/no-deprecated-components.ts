@@ -11,9 +11,39 @@ export type MessageIds = 'removed' | 'replacedWith' | 'deprecated';
 
 export type Options = [{ legacy: boolean }];
 
+// todo: remove after vuetify migration is complete.
+const vuetify = {
+  VApp: true,
+  VAppBar: true,
+  VAppBarNavIcon: true,
+  VAutocomplete: true,
+  VAvatar: true,
+  VBottomSheet: true,
+  VColorPicker: true,
+  VCombobox: true,
+  VDataFooter: true,
+  VDataTable: true,
+  VDialog: true,
+  VDialogTransition: true,
+  VExpansionPanel: true,
+  VExpansionPanelContent: true,
+  VExpansionPanelHeader: true,
+  VExpansionPanels: true,
+  VMain: true,
+  VMenu: true,
+  VNavigationDrawer: true,
+  VPagination: true,
+  VSelect: true,
+  VSlider: true,
+  VSnackbar: true,
+  VSwitch: true,
+  VTextField: true,
+} as const;
+
 const replacements = {
   DataTable: true,
   Fragment: false,
+  ...vuetify,
 } as const;
 
 const skipInLegacy = [

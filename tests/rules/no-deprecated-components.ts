@@ -42,5 +42,13 @@ tester.run('no-deprecated-components', rule as never, {
         { messageId: 'deprecated' },
       ],
     },
+    {
+      filename: 'test.vue',
+      code: `<template><VAppBar><div></div></VAppBar></template>`,
+      output: `<template><VAppBar><div></div></VAppBar></template>`,
+      errors: [
+        { messageId: 'deprecated' },
+      ],
+    },
   ],
 });
