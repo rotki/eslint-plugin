@@ -72,6 +72,16 @@ tester.run(RULE_NAME, rule as never, {
       errors: [{ messageId: 'replacedWith' }],
     },
     {
+      code: '<template><div class="m-n2 pl-n4 mt-n6 pa-2"/></template>',
+      output: '<template><div class="-m-2 -pl-4 -mt-6 p-2"/></template>',
+      errors: [
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+        { messageId: 'replacedWith' },
+      ],
+    },
+    {
       code: `
       <script>
       export default {

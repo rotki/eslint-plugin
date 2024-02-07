@@ -48,6 +48,17 @@ const replacements: Replacer[] = [
     ([weight]) => `font-${weight}`,
   ],
   [/^text-(capitalize|uppercase|lowercase)$/, ([casing]) => casing],
+  ['text--secondary', 'text-rui-text-secondary'],
+  ['white--text', 'text-white'],
+  ['primary--text', 'text-rui-primary'],
+  [
+    /^([mp])([abelr-txy]?)-n(\d)$/,
+    ([type, position, size]) => `-${type}${position === 'a' ? '' : position}-${size}`,
+  ],
+  [
+    /^([mp])a-(\d)$/,
+    ([type, size]) => `${type}-${size}`,
+  ],
 ];
 
 function isString(replacement: Replacer): replacement is StringReplacer {
