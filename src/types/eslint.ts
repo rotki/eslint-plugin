@@ -9,11 +9,11 @@ export interface RuleCreateAndOptions<TOptions extends readonly unknown[], TMess
 }
 
 export interface RuleWithMeta<TOptions extends readonly unknown[], TMessageIds extends string> extends RuleCreateAndOptions<TOptions, TMessageIds> {
-  meta: TSESLint.RuleMetaData<TMessageIds>;
+  meta: TSESLint.RuleMetaData<TMessageIds, TOptions>;
 }
 
 export interface RuleWithMetaAndName<TOptions extends readonly unknown[], TMessageIds extends string> extends RuleCreateAndOptions<TOptions, TMessageIds> {
-  meta: ESLintUtils.NamedCreateRuleMeta<TMessageIds>;
+  meta: ESLintUtils.NamedCreateRuleMeta<TMessageIds, TOptions>;
   name: string;
 }
 
@@ -25,14 +25,14 @@ interface RuleFix {
 type NodeOrToken = TSESTree.Node | TSESTree.Token | Node;
 
 interface RuleFixer {
-  insertTextAfter(nodeOrToken: NodeOrToken, text: string): RuleFix;
-  insertTextAfterRange(range: Readonly<AST.Range>, text: string): RuleFix;
-  insertTextBefore(nodeOrToken: NodeOrToken, text: string): RuleFix;
-  insertTextBeforeRange(range: Readonly<AST.Range>, text: string): RuleFix;
-  remove(nodeOrToken: NodeOrToken): RuleFix;
-  removeRange(range: Readonly<AST.Range>): RuleFix;
-  replaceText(nodeOrToken: NodeOrToken, text: string): RuleFix;
-  replaceTextRange(range: Readonly<AST.Range>, text: string): RuleFix;
+  insertTextAfter: (nodeOrToken: NodeOrToken, text: string) => RuleFix;
+  insertTextAfterRange: (range: Readonly<AST.Range>, text: string) => RuleFix;
+  insertTextBefore: (nodeOrToken: NodeOrToken, text: string) => RuleFix;
+  insertTextBeforeRange: (range: Readonly<AST.Range>, text: string) => RuleFix;
+  remove: (nodeOrToken: NodeOrToken) => RuleFix;
+  removeRange: (range: Readonly<AST.Range>) => RuleFix;
+  replaceText: (nodeOrToken: NodeOrToken, text: string) => RuleFix;
+  replaceTextRange: (range: Readonly<AST.Range>, text: string) => RuleFix;
 }
 
 interface SuggestionReportDescriptor<TMessageIds extends string> extends Omit<ReportDescriptorBase<TMessageIds>, 'fix'> {
@@ -99,12 +99,12 @@ export interface RuleModule<
   /**
    * Metadata about the rule
    */
-  meta: TSESLint.RuleMetaData<TMessageIds>;
+  meta: TSESLint.RuleMetaData<TMessageIds, TOptions>;
   /**
    * Function which returns an object with methods that ESLint calls to “visit”
    * nodes while traversing the abstract syntax tree.
    */
-  create(context: Readonly<RuleContext<TMessageIds, TOptions>>): TRuleListener;
+  create: (context: Readonly<RuleContext<TMessageIds, TOptions>>) => TRuleListener;
 }
 
 export interface PluginRuleModule<TOptions extends readonly unknown[] = []> extends Rule.RuleModule {
@@ -116,5 +116,5 @@ export interface RuleContext<
   TOptions extends readonly unknown[],
 > extends Omit<TSESLint.RuleContext<TMessageIds, TOptions>, 'sourceCode' | 'report'> {
   sourceCode: Readonly<SourceCode>;
-  report(descriptor: ReportDescriptor<TMessageIds>): void;
+  report: (descriptor: ReportDescriptor<TMessageIds>) => void;
 }

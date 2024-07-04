@@ -21,7 +21,7 @@ e.g.
 module.export = {
   extends: [
     'eslint:recommended',
-    'plugin:@rotki/recommended'
+    'plugin:@rotki/recommended',
   ],
-}
+};
 ```

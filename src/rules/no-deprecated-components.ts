@@ -63,7 +63,7 @@ export default createEslintRule<Options, MessageIds>({
         const tag = pascalCase(element.rawName);
 
         const sourceCode = getSourceCode(context);
-        if (!('getTemplateBodyTokenStore' in sourceCode.parserServices))
+        if (sourceCode?.parserServices && !('getTemplateBodyTokenStore' in sourceCode.parserServices))
           throw new Error('cannot find getTemplateBodyTokenStore in parserServices');
 
         if (!hasReplacement(tag))
