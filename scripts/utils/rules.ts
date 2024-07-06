@@ -19,7 +19,7 @@ export interface RuleInfo {
 export const rules = Object.entries(plugin.rules).map((rule) => {
   const name = rule[0];
   // todo, maybe adjust the type and remove the cast?
-  const meta = rule[1].meta as RuleMetaData<''> | undefined;
+  const meta = rule[1].meta as RuleMetaData<'', []> | undefined;
 
   if (!meta || !meta.docs)
     throw new Error('meta and meta.docs are not supposed to be missing did you forget to add them');

@@ -18,6 +18,9 @@ export function defineTemplateBodyVisitor<
 ): RuleListener {
   const sourceCode = getSourceCode(context);
   const parserServices = sourceCode.parserServices;
+  if (!parserServices)
+    throw new Error('missing parserServices');
+
   if (
     !('defineTemplateBodyVisitor' in parserServices)
     || parserServices.defineTemplateBodyVisitor == null
