@@ -1,13 +1,14 @@
 import { RuleTester } from 'eslint';
+import vueParser from 'vue-eslint-parser';
 import rule from '../../src/rules/no-deprecated-components';
 
-const vueParser = require.resolve('vue-eslint-parser');
-
 const tester = new RuleTester({
-  parser: vueParser,
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
+  languageOptions: {
+    parser: vueParser,
+    parserOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+    },
   },
 });
 
@@ -32,7 +33,6 @@ tester.run('no-deprecated-components', rule as never, {
     {
       filename: 'test.vue',
       code: `<template><Fragment><div></div></Fragment></template>`,
-      output: `<template><Fragment><div></div></Fragment></template>`,
       options: [
         {
           legacy: true,
@@ -45,7 +45,6 @@ tester.run('no-deprecated-components', rule as never, {
     {
       filename: 'test.vue',
       code: `<template><VAppBar><div></div></VAppBar></template>`,
-      output: `<template><VAppBar><div></div></VAppBar></template>`,
       errors: [
         { messageId: 'deprecated' },
       ],

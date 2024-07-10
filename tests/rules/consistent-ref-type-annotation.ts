@@ -1,14 +1,15 @@
 import { RuleTester } from 'eslint';
+import vueParser from 'vue-eslint-parser';
 import rule from '../../src/rules/consistent-ref-type-annotation';
 
-const vueParser = require.resolve('vue-eslint-parser');
-
 const tester = new RuleTester({
-  parser: vueParser,
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-    parser: '@typescript-eslint/parser',
+  languageOptions: {
+    parser: vueParser,
+    parserOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      parser: '@typescript-eslint/parser',
+    },
   },
 });
 
@@ -71,12 +72,6 @@ tester.run('consistent-refs', rule as never, {
     {
       filename: 'test.vue',
       code: `
-      <script setup lang="ts">
-        const inferRef = ref('');
-        const inferComputed = computed(() => '');
-      </script>
-      `,
-      output: `
       <script setup lang="ts">
         const inferRef = ref('');
         const inferComputed = computed(() => '');

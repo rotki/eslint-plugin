@@ -1,11 +1,12 @@
 import { RuleTester } from 'eslint';
+import vueParser from 'vue-eslint-parser';
 import rule, { RULE_NAME } from '../../src/rules/no-deprecated-classes';
 
-const vueParser = require.resolve('vue-eslint-parser');
-
 const tester = new RuleTester({
-  parser: vueParser,
-  parserOptions: { ecmaVersion: 2021, sourceType: 'module' },
+  languageOptions: {
+    parser: vueParser,
+    parserOptions: { ecmaVersion: 2021, sourceType: 'module' },
+  },
 });
 
 tester.run(RULE_NAME, rule as never, {

@@ -1,13 +1,14 @@
 import { RuleTester } from 'eslint';
+import vueParser from 'vue-eslint-parser';
 import rule from '../../src/rules/no-deprecated-props';
 
-const vueParser = require.resolve('vue-eslint-parser');
-
 const tester = new RuleTester({
-  parser: vueParser,
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
+  languageOptions: {
+    parser: vueParser,
+    parserOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+    },
   },
 });
 
