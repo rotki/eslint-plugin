@@ -246,7 +246,7 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     docs: {
       description: 'disallow the usage of vuetify css classes since they are replaced with tailwindcss',
-      recommended: 'recommended',
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

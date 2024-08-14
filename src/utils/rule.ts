@@ -3,6 +3,7 @@ import type {
   RuleContext,
   RuleListener,
   RuleModule,
+  RuleRecommendationMeta,
   RuleWithMeta,
   RuleWithMetaAndName,
 } from '../types';
@@ -70,4 +71,4 @@ function createRule<
 
 export const createEslintRule = RuleCreator(
   ruleName => `${blobUrl}${ruleName}`,
-) as any as <TOptions extends readonly unknown[], TMessageIds extends string>({ meta, name, ...rule }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>) => PluginRuleModule<TOptions>;
+) as any as <TOptions extends readonly unknown[], TMessageIds extends string>({ meta, name, ...rule }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds, RuleRecommendationMeta>>) => PluginRuleModule<TOptions>;

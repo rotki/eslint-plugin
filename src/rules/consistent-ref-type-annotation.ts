@@ -108,7 +108,7 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     docs: {
       description: 'Ensures consistent type annotation position for ref, computed assignments',
-      recommended: 'recommended',
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

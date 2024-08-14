@@ -132,10 +132,12 @@ class DocFile {
         }>`;
       })
       .replace(
+        // eslint-disable-next-line regexp/no-useless-flag,regexp/match-any,regexp/no-unused-capturing-group
         /\n+(<(?:eslint-code-block|resource-group)([\S\s]*?)>)\n+/gm,
         '\n\n$1\n\n',
       )
       .replace(
+        // eslint-disable-next-line regexp/no-useless-flag
         /\n+<\/(eslint-code-block|resource-group)\s*>\n+/gm,
         '\n\n</$1>\n\n',
       );

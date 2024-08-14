@@ -104,7 +104,7 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     docs: {
       description: 'Removes deprecated classes that do not exist anymore',
-      recommended: 'recommended',
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

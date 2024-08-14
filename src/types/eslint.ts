@@ -8,12 +8,12 @@ export interface RuleCreateAndOptions<TOptions extends readonly unknown[], TMess
   defaultOptions: Readonly<TOptions>;
 }
 
-export interface RuleWithMeta<TOptions extends readonly unknown[], TMessageIds extends string> extends RuleCreateAndOptions<TOptions, TMessageIds> {
-  meta: TSESLint.RuleMetaData<TMessageIds, TOptions>;
+export interface RuleWithMeta<TOptions extends readonly unknown[], TMessageIds extends string, Docs = unknown> extends RuleCreateAndOptions<TOptions, TMessageIds> {
+  meta: TSESLint.RuleMetaData<TMessageIds, Docs>;
 }
 
-export interface RuleWithMetaAndName<TOptions extends readonly unknown[], TMessageIds extends string> extends RuleCreateAndOptions<TOptions, TMessageIds> {
-  meta: ESLintUtils.NamedCreateRuleMeta<TMessageIds, TOptions>;
+export interface RuleWithMetaAndName<TOptions extends readonly unknown[], TMessageIds extends string, Docs = unknown> extends RuleCreateAndOptions<TOptions, TMessageIds> {
+  meta: ESLintUtils.NamedCreateRuleMeta<TMessageIds, Docs>;
   name: string;
 }
 
@@ -117,4 +117,8 @@ export interface RuleContext<
 > extends Omit<TSESLint.RuleContext<TMessageIds, TOptions>, 'sourceCode' | 'report'> {
   sourceCode: Readonly<SourceCode>;
   report: (descriptor: ReportDescriptor<TMessageIds>) => void;
+}
+
+export interface RuleRecommendationMeta {
+  recommendation?: TSESLint.RuleRecommendation;
 }
