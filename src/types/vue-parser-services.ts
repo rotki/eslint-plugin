@@ -210,11 +210,11 @@ export interface CustomBlockContext {
 };
 
 type CustomBlockVisitorFactory = (context: CustomBlockContext) =>
-| {
-  [key: string]: (...args: any) => void;
-}
-| null
-| undefined;
+  | {
+    [key: string]: (...args: any) => void;
+  }
+  | null
+  | undefined;
 
 export interface ParserServices {
   /**
