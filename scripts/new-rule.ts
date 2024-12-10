@@ -57,16 +57,18 @@ export default createEslintRule<Options, MessageIds>({
     testFile,
     `import { RuleTester } from 'eslint'
 import rule from '../../src/rules/${ruleId}'
-
-const vueParser = require.resolve('vue-eslint-parser')
+import vueParser from 'vue-eslint-parser';
 
 const tester = new RuleTester({
+  languageOptions: {
     parser: vueParser,
     parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: "module",
+      ecmaVersion: 2020,
+      sourceType: 'module',
     },
-})
+  },
+});
+
 
 tester.run("${ruleId}", rule as never, {
     valid: [
