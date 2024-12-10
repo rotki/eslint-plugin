@@ -74,7 +74,8 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   meta: {
     docs: {
-      description: '...',
+      description: 'Replaces deprecated props with their replacements',
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

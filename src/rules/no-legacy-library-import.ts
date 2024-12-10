@@ -32,6 +32,7 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     docs: {
       description: `Reports and replaces imports of ${legacyLibrary} with ${newLibrary}`,
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

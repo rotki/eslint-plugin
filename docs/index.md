@@ -4,7 +4,7 @@ layout: home
 
 hero:
     name: '@rotki/eslint-plugin'
-    tagline: ESLint plugin for Vue I18n
+    tagline: ESLint plugin for rotki
     actions:
         - theme: brand
           text: Introduction

@@ -30,6 +30,7 @@
     "clean": "rimraf .nyc_output coverage dist docs/.vitepress/dist",
     "coverage": "nyc report --reporter lcov && opener coverage/lcov-report/index.html",
     "generate": "node --experimental-specifier-resolution=node --loader ts-node/esm scripts/update-rule-docs.ts",
+    "generate:index": "node --experimental-specifier-resolution=node --loader ts-node/esm scripts/update-docs-index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "unbuild",
@@ -39,7 +40,7 @@
     "test:coverage": "vitest run --coverage",
     "new": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/new-rule.ts",
     "docs": "vitepress dev docs",
-    "docs:build": "pnpm run generate && vitepress build docs",
+    "docs:build": "pnpm run generate && pnpm run generate:index && vitepress build docs",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "release": "bumpp -r --no-push"

@@ -3,8 +3,11 @@
  */
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import url from 'node:url';
 import { type Options, format } from 'prettier';
 import { type RuleInfo, withCategories } from './utils';
+
+const dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const prettierrc: Options = {
   semi: true,
@@ -36,7 +39,7 @@ ${rules.map(toTableRow).join('\n')}
 `;
 }
 
-const filePath = resolve(__dirname, '../docs/rules/index.md');
+const filePath = resolve(dirname, '../docs/rules/index.md');
 const content = `# Available Rules
 
 - :star: mark: the rule which is enabled by \`plugin:@rotki/recommended\` preset.
