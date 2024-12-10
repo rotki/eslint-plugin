@@ -4,6 +4,7 @@ import noDeprecatedComponents from './rules/no-deprecated-components';
 import noDeprecatedProps from './rules/no-deprecated-props';
 import noLegacyLibraryImport from './rules/no-legacy-library-import';
 import consistentRefTypeAnnotation from './rules/consistent-ref-type-annotation';
+import noDotTsImport from './rules/no-dot-ts-imports';
 import type { ESLint } from 'eslint';
 
 const plugin = {
@@ -16,6 +17,7 @@ const plugin = {
     'no-deprecated-classes': noDeprecatedClasses,
     'no-deprecated-components': noDeprecatedComponents,
     'no-deprecated-props': noDeprecatedProps,
+    'no-dot-ts-imports': noDotTsImport,
     'no-legacy-library-import': noLegacyLibraryImport,
   },
 } satisfies ESLint.Plugin;

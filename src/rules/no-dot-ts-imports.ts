@@ -1,6 +1,6 @@
 import { createEslintRule } from '../utils';
 
-export const RULE_NAME = 'no-dot-ts-import';
+export const RULE_NAME = 'no-dot-ts-imports';
 
 export type MessageIds = 'invalidTSExtension';
 
@@ -34,6 +34,7 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     docs: {
       description: 'Checks and replaces .ts extension in import statements.',
+      recommendation: 'recommended',
     },
     fixable: 'code',
     messages: {

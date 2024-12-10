@@ -1,6 +1,6 @@
 import { RuleTester } from 'eslint';
 import vueParser from 'vue-eslint-parser';
-import rule from '../../src/rules/no-dot-ts-import';
+import rule from '../../src/rules/no-dot-ts-imports';
 
 const tester = new RuleTester({
   languageOptions: {
