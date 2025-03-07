@@ -41,10 +41,6 @@ The guide includes detailed information about:
 - Code style and linting
 - Pull request process
 
-## Documentation
-
-See [here](https://rotki.github.io/eslint-plugin)
-
 ## License
 
 [AGPL-3.0](./LICENSE) License &copy; 2023- [Rotki Solutions GmbH](https://github.com/rotki)
