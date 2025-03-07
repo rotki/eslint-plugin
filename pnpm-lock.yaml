@@ -24,8 +24,8 @@ importers:
         specifier: 1.3.0
         version: 1.3.0
       vue-eslint-parser:
-        specifier: 9.4.3
-        version: 9.4.3(eslint@9.19.0(jiti@2.4.2))
+        specifier: 10.1.1
+        version: 10.1.1(eslint@9.19.0(jiti@2.4.2))
       yaml-eslint-parser:
         specifier: 1.2.3
         version: 1.2.3
@@ -3660,6 +3660,12 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  vue-eslint-parser@10.1.1:
+    resolution: {integrity: sha512-bh2Z/Au5slro9QJ3neFYLanZtb1jH+W2bKqGHXAoYD4vZgNG3KeotL7JpPv5xzY4UXUXJl7TrIsnzECH63kd3Q==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0
 
   vue-eslint-parser@9.4.3:
     resolution: {integrity: sha512-2rYRLWlIpaiN8xbPiDyXZXRgLGOtWxERV7ND5fFAv5qo1D2N9Fu9MNajBNc6o13lZ+24DAWCkQCvj4klgmcITg==}
@@ -7613,6 +7619,19 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+
+  vue-eslint-parser@10.1.1(eslint@9.19.0(jiti@2.4.2)):
+    dependencies:
+      debug: 4.4.0
+      eslint: 9.19.0(jiti@2.4.2)
+      eslint-scope: 8.2.0
+      eslint-visitor-keys: 4.2.0
+      espree: 10.3.0
+      esquery: 1.6.0
+      lodash: 4.17.21
+      semver: 7.6.3
+    transitivePeerDependencies:
+      - supports-color
 
   vue-eslint-parser@9.4.3(eslint@9.19.0(jiti@2.4.2)):
     dependencies:

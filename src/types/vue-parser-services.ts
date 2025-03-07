@@ -1,8 +1,7 @@
+import type { ESLintExtendedProgram, ESLintProgram, VDocumentFragment, VElement } from 'vue-eslint-parser/ast/nodes';
 import type { AST, Rule } from 'eslint';
 import type { HasLocation } from 'vue-eslint-parser/ast/locations';
 import type { Token } from 'vue-eslint-parser/ast/tokens';
-import type { VElement } from 'vue-eslint-parser/ast';
-import type { ESLintExtendedProgram, ESLintProgram, VDocumentFragment } from 'vue-eslint-parser/ast/nodes';
 import type { RuleListener as TSRuleListener, SourceCode as TSSourceCode } from '@typescript-eslint/utils/ts-eslint';
 
 export type SkipOptions = number | ((token: Token) => boolean) | {
