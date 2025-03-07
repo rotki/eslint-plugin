@@ -1,8 +1,8 @@
+import type { RuleFix } from '@typescript-eslint/utils/ts-eslint';
+import type { RuleContext } from '../types';
 import { TSESTree } from '@typescript-eslint/utils';
 import createDebug from 'debug';
 import { createEslintRule, getSourceCode } from '../utils';
-import type { RuleContext } from '../types';
-import type { RuleFix } from '@typescript-eslint/utils/ts-eslint';
 
 const debug = createDebug('@rotki/eslint-plugin:consistent-ref-type-annotation');
 

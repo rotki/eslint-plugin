@@ -1,5 +1,5 @@
-import * as compat from 'eslint-compat-utils';
 import type { RuleContext, SourceCode } from '../types';
+import * as compat from 'eslint-compat-utils';
 
 export function getFilename<
   TMessageIds extends string,

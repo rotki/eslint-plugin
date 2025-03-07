@@ -60,7 +60,7 @@
   "devDependencies": {
     "@commitlint/cli": "19.7.1",
     "@commitlint/config-conventional": "19.7.1",
-    "@rotki/eslint-config": "3.7.0",
+    "@rotki/eslint-config": "4.0.1",
     "@types/debug": "4.1.12",
     "@types/node": "20",
     "@typescript-eslint/eslint-plugin": "8.26.0",

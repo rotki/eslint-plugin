@@ -1,7 +1,7 @@
-import { kebabCase, pascalCase } from 'scule';
-import createDebug from 'debug';
-import { createEslintRule, defineTemplateBodyVisitor } from '../utils';
 import type { AST as VAST } from 'vue-eslint-parser';
+import createDebug from 'debug';
+import { kebabCase, pascalCase } from 'scule';
+import { createEslintRule, defineTemplateBodyVisitor } from '../utils';
 
 const debug = createDebug('@rotki/eslint-plugin:no-deprecated-props');
 

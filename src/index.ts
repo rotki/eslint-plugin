@@ -1,6 +1,6 @@
+import type { Linter } from 'eslint';
 import { configs } from './configs';
 import plugin from './plugin';
-import type { Linter } from 'eslint';
 
 export default Object.assign(plugin, { configs });
 

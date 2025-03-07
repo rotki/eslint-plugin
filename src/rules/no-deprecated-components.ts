@@ -1,7 +1,7 @@
+import type { VElement } from 'vue-eslint-parser/ast/nodes';
 import createDebug from 'debug';
 import { pascalCase } from 'scule';
 import { createEslintRule, defineTemplateBodyVisitor, getSourceCode } from '../utils';
-import type { VElement } from 'vue-eslint-parser/ast/nodes';
 
 const debug = createDebug('@rotki/eslint-plugin:no-deprecated-components');
 

@@ -1,6 +1,6 @@
+import type { ReportDescriptor, RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
 import { extname } from 'node:path';
 import { getFilename, getSourceCode } from './compat';
-import type { ReportDescriptor, RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
 
 /**
  * Register the given visitor to parser services. from GitHub `vuejs/eslint-plugin-vue` repo
@@ -11,7 +11,7 @@ export function defineTemplateBodyVisitor<
   TMessageIds extends string,
   TOptions extends readonly unknown[],
 >(
-  context: RuleContext<TMessageIds, TOptions >,
+  context: RuleContext<TMessageIds, TOptions>,
   templateBodyVisitor: TemplateBodyVisitor,
   scriptVisitor?: TemplateBodyVisitor,
   options?: { templateBodyTriggerSelector: 'Program' | 'Program:exit' },

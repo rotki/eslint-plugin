@@ -4,8 +4,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as url from 'node:url';
-import { type Options, format } from 'prettier';
 import createDebug from 'debug';
+import { format, type Options } from 'prettier';
 import { type RuleInfo, rules } from './utils';
 
 const debug = createDebug('@rotki/eslint-plugin:update-rule-docs');

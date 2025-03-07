@@ -4,7 +4,7 @@
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import url from 'node:url';
-import { type Options, format } from 'prettier';
+import { format, type Options } from 'prettier';
 import { type RuleInfo, withCategories } from './utils';
 
 const dirname = url.fileURLToPath(new URL('.', import.meta.url));

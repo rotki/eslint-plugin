@@ -1,5 +1,4 @@
-import debugFactory from 'debug';
-import { createEslintRule, defineTemplateBodyVisitor, getSourceCode, getStaticPropertyName } from '../utils';
+import type { AST as VAST } from 'vue-eslint-parser';
 import type {
   ESLintExpression,
   VExpressionContainer,
@@ -10,7 +9,8 @@ import type {
   VSlotScopeExpression,
 } from 'vue-eslint-parser/ast/nodes';
 import type { Range, RuleContext } from '../types';
-import type { AST as VAST } from 'vue-eslint-parser';
+import debugFactory from 'debug';
+import { createEslintRule, defineTemplateBodyVisitor, getSourceCode, getStaticPropertyName } from '../utils';
 
 export const RULE_NAME = 'no-deprecated-classes';
 
@@ -147,7 +147,7 @@ function* extractClassNames(
 ): IterableIterator<FoundClass> {
   if (node.type === 'Literal') {
     const classNames = `${node.value}`;
-    yield * classNames
+    yield* classNames
       .split(/\s+/)
       .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: node }));
     return;
@@ -158,12 +158,12 @@ function* extractClassNames(
       if (classNames === null)
         continue;
 
-      yield * classNames
+      yield* classNames
         .split(/\s+/)
         .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: templateElement }));
     }
     for (const expr of node.expressions)
-      yield * extractClassNames(expr, true);
+      yield* extractClassNames(expr, true);
 
     return;
   }
@@ -171,8 +171,8 @@ function* extractClassNames(
     if (node.operator !== '+')
       return;
 
-    yield * extractClassNames(node.left as ESLintExpression, true);
-    yield * extractClassNames(node.right, true);
+    yield* extractClassNames(node.left as ESLintExpression, true);
+    yield* extractClassNames(node.right, true);
     return;
   }
   if (textOnly)
@@ -187,7 +187,7 @@ function* extractClassNames(
       if (!classNames)
         continue;
 
-      yield * classNames
+      yield* classNames
         .split(/\s+/)
         .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: prop.key }));
     }
@@ -201,13 +201,13 @@ function* extractClassNames(
       if (element.type === 'SpreadElement')
         continue;
 
-      yield * extractClassNames(element);
+      yield* extractClassNames(element);
     }
   }
 
   if (node.type === 'ConditionalExpression') {
-    yield * extractClassNames(node.consequent);
-    yield * extractClassNames(node.alternate);
+    yield* extractClassNames(node.consequent);
+    yield* extractClassNames(node.alternate);
   }
 }
 

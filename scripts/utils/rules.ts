@@ -2,9 +2,9 @@
  * Forked from https://github.com/intlify/eslint-plugin-vue-i18n/blob/master/scripts/lib/rules.ts
  */
 
-import plugin from '../../src/plugin';
-import type { RuleRecommendationMeta } from '../../src/types';
 import type { RuleMetaData } from '@typescript-eslint/utils/ts-eslint';
+import type { RuleRecommendationMeta } from '../../src/types';
+import plugin from '../../src/plugin';
 
 export interface RuleInfo {
   id: string;
