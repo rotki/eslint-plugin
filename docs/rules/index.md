@@ -9,6 +9,7 @@
 | Rule ID | Description |    |
 |:--------|:------------|:---|
 | [@rotki/<wbr>consistent-ref-type-annotation](./consistent-ref-type-annotation.html) | Ensures consistent type annotation position for ref, computed assignments | :star::black_nib: |
+| [@rotki/<wbr>max-dependencies](./max-dependencies.html) | enforce a maximum number of dependencies per file | :star: |
 | [@rotki/<wbr>no-deprecated-classes](./no-deprecated-classes.html) | disallow the usage of vuetify css classes since they are replaced with tailwindcss | :star::black_nib: |
 | [@rotki/<wbr>no-deprecated-components](./no-deprecated-components.html) | Removes deprecated classes that do not exist anymore | :star::black_nib: |
 | [@rotki/<wbr>no-deprecated-props](./no-deprecated-props.html) | Replaces deprecated props with their replacements | :star::black_nib: |
