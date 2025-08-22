@@ -8,7 +8,6 @@ Before you start contributing, make sure you have the following tools installed:
 
 - **Node.js** (version 20 or higher). For ease of setup we recommend the usage of [`nvm`](https://github.com/nvm-sh/nvm).
 - **pnpm** as the package manager
-
   - To install pnpm, use:
 
   `npm install -g pnpm`
