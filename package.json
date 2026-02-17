@@ -62,7 +62,7 @@
     "@rotki/eslint-config": "4.5.0",
     "@rotki/eslint-plugin": "1.2.0",
     "@types/debug": "4.1.12",
-    "@types/node": "22.17.2",
+    "@types/node": "24.10.13",
     "@typescript-eslint/eslint-plugin": "8.40.0",
     "@typescript-eslint/parser": "8.40.0",
     "@typescript-eslint/rule-tester": "8.40.0",
@@ -80,7 +80,7 @@
     "vitest": "3.2.4"
   },
   "engines": {
-    "node": ">=22 <23",
+    "node": ">=24 <25",
     "pnpm": ">=10 <11"
   },
   "pnpm": {

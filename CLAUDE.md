@@ -31,7 +31,7 @@ This project uses pnpm as the package manager.
 
 ## Node Version
 
-Requires Node.js 22.x
+Requires Node.js 24.x
 
 ## Testing
 
