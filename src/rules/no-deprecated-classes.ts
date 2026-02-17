@@ -1,16 +1,21 @@
 import type { AST as VAST } from 'vue-eslint-parser';
-import type {
-  ESLintExpression,
-  VExpressionContainer,
-  VFilterSequenceExpression,
-  VForExpression,
-  VGenericExpression,
-  VOnExpression,
-  VSlotScopeExpression,
-} from 'vue-eslint-parser/ast/nodes';
 import type { Range, RuleContext } from '../types';
 import debugFactory from 'debug';
 import { createEslintRule, defineTemplateBodyVisitor, getSourceCode, getStaticPropertyName } from '../utils';
+
+type ESLintExpression = VAST.ESLintExpression;
+
+type VExpressionContainer = VAST.VExpressionContainer;
+
+type VFilterSequenceExpression = VAST.VFilterSequenceExpression;
+
+type VForExpression = VAST.VForExpression;
+
+type VGenericExpression = VAST.VGenericExpression;
+
+type VOnExpression = VAST.VOnExpression;
+
+type VSlotScopeExpression = VAST.VSlotScopeExpression;
 
 export const RULE_NAME = 'no-deprecated-classes';
 

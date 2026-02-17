@@ -1,4 +1,6 @@
-import type { ESLintNode } from 'vue-eslint-parser/ast/nodes';
+import type { AST } from 'vue-eslint-parser';
+
+type ESLintNode = AST.ESLintNode;
 
 function getStringLiteralValue(node: ESLintNode, stringOnly: boolean = false) {
   if (node.type === 'Literal') {

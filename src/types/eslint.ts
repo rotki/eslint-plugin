@@ -1,7 +1,9 @@
 import type { ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import type { AST, Rule } from 'eslint';
-import type { Node } from 'vue-eslint-parser/ast/nodes';
+import type { AST as VAST } from 'vue-eslint-parser';
 import type { SourceCode } from './vue-parser-services';
+
+type Node = VAST.Node;
 
 export interface RuleCreateAndOptions<TOptions extends readonly unknown[], TMessageIds extends string> {
   create: (context: Readonly<RuleContext<TMessageIds, TOptions>>, optionsWithDefault: Readonly<TOptions>) => TSESLint.RuleListener;
