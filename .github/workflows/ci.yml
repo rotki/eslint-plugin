@@ -23,7 +23,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout 🛎
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -32,7 +32,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup node env 🏗
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
           node-version-file: .nvmrc
@@ -57,7 +57,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout 🛎
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -65,7 +65,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup node env 🏗
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
           node-version-file: .nvmrc
