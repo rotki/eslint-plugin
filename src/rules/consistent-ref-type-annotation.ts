@@ -12,16 +12,15 @@ export type MessageIds = 'inconsistent' | 'missingType';
 
 export type Options = [{ allowInference: boolean }];
 
-const FIXABLE_METHODS = ['ref', 'computed'] as const;
+const FIXABLE_METHODS = new Set<string>(['ref', 'computed']);
 
 function checkAssignmentDeclaration(
   context: Readonly<RuleContext<MessageIds, Options>>,
+  source: ReturnType<typeof getSourceCode>,
   node: TSESTree.VariableDeclaration,
   declaration: TSESTree.LetOrConstOrVarDeclarator,
-  options: { allowInference: boolean },
+  allowInference: boolean,
 ): void {
-  const source = getSourceCode(context);
-  const { allowInference } = options;
   let declarationTypeArguments: TSESTree.TSTypeParameterInstantiation | undefined;
 
   const init = declaration.init;
@@ -33,7 +32,7 @@ function checkAssignmentDeclaration(
   if (!(callee && callee.type === TSESTree.AST_NODE_TYPES.Identifier))
     return;
 
-  if (!Array.prototype.includes.call(FIXABLE_METHODS, callee.name))
+  if (!FIXABLE_METHODS.has(callee.name))
     return;
 
   const name = callee.name;
@@ -92,6 +91,7 @@ export default createEslintRule<Options, MessageIds>({
   create(context, optionsWithDefault) {
     const options = optionsWithDefault[0] || {};
     const allowInference = options.allowInference;
+    const source = getSourceCode(context);
     return {
       VariableDeclaration: (node): void => {
         const declarations = node.declarations;
@@ -99,7 +99,7 @@ export default createEslintRule<Options, MessageIds>({
           if (declaration.type !== TSESTree.AST_NODE_TYPES.VariableDeclarator)
             continue;
 
-          checkAssignmentDeclaration(context, node, declaration, { allowInference });
+          checkAssignmentDeclaration(context, source, node, declaration, allowInference);
         }
       },
     };

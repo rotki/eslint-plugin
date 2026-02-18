@@ -25,13 +25,9 @@ export type Options = [];
 
 const debug = debugFactory('@rotki/eslint-plugin:no-deprecated-classes');
 
-type StringReplacer = [string, string];
-
 type RegexReplacer = [RegExp, (args: string[]) => string];
 
-type Replacer = StringReplacer | RegexReplacer;
-
-const replacements: Replacer[] = [
+const stringReplacements = new Map<string, string>([
   ['d-block', 'block'],
   ['d-flex', 'flex'],
   ['flex-column', 'flex-col'],
@@ -39,6 +35,12 @@ const replacements: Replacer[] = [
   ['flex-grow-0', 'grow-0'],
   ['flex-shrink-1', 'shrink'],
   ['flex-shrink-0', 'shrink-0'],
+  ['text--secondary', 'text-rui-text-secondary'],
+  ['white--text', 'text-white'],
+  ['primary--text', 'text-rui-primary'],
+]);
+
+const regexReplacements: RegexReplacer[] = [
   [
     /^align-(start|end|center|baseline|stretch)$/,
     ([align]) => `items-${align}`,
@@ -53,9 +55,6 @@ const replacements: Replacer[] = [
     ([weight]) => `font-${weight}`,
   ],
   [/^text-(capitalize|uppercase|lowercase)$/, ([casing]) => casing],
-  ['text--secondary', 'text-rui-text-secondary'],
-  ['white--text', 'text-white'],
-  ['primary--text', 'text-rui-primary'],
   [
     /^([mp])([abelr-txy]?)-n(\d)$/,
     ([type, position, size]) => `-${type}${position === 'a' ? '' : position}-${size}`,
@@ -66,25 +65,15 @@ const replacements: Replacer[] = [
   ],
 ];
 
-function isString(replacement: Replacer): replacement is StringReplacer {
-  return typeof replacement[0] === 'string';
-}
-
-function isRegex(replacement: Replacer): replacement is RegexReplacer {
-  return replacement[0] instanceof RegExp;
-}
-
 function findReplacement(className: string): string | undefined {
-  for (const replacement of replacements) {
-    if (isString(replacement) && replacement[0] === className)
-      return replacement[1];
+  const direct = stringReplacements.get(className);
+  if (direct !== undefined)
+    return direct;
 
-    if (isRegex(replacement)) {
-      const matches = (replacement[0].exec(className) || []).slice(1);
-      const replace = replacement[1];
-      if (matches.length > 0 && typeof replace === 'function')
-        return replace(matches);
-    }
+  for (const [regex, replace] of regexReplacements) {
+    const matches = regex.exec(className);
+    if (matches)
+      return replace(matches.slice(1));
   }
   return undefined;
 }
@@ -101,11 +90,10 @@ function reportReplacement(
   replacement: string,
   node: VAST.VAttribute | ExpressionType | VAST.ESLintTemplateElement,
   context: RuleContext<MessageIds, Options>,
+  source: ReturnType<typeof getSourceCode>,
   position: number = 1,
 ): void {
   debug(`found replacement ${replacement} for ${className}`);
-
-  const source = getSourceCode(context);
 
   const initialRange = getRange(node);
 
@@ -218,6 +206,7 @@ function* extractClassNames(
 
 export default createEslintRule<Options, MessageIds>({
   create(context) {
+    const source = getSourceCode(context);
     return defineTemplateBodyVisitor(context, {
       'VAttribute[directive=false][key.name="class"]': function (node: VAST.VAttribute) {
         if (!node.value || !node.value.value)
@@ -230,7 +219,7 @@ export default createEslintRule<Options, MessageIds>({
           if (!replacement)
             continue;
 
-          reportReplacement(className, replacement, node, context, position);
+          reportReplacement(className, replacement, node, context, source, position);
         }
       },
       'VAttribute[directive=true][key.name.name=\'bind\'][key.argument.name=\'class\'] > VExpressionContainer.value': function (node: VExpressionContainer) {
@@ -242,7 +231,7 @@ export default createEslintRule<Options, MessageIds>({
           if (!replacement)
             continue;
 
-          reportReplacement(className, replacement, reportNode, context, position);
+          reportReplacement(className, replacement, reportNode, context, source, position);
         }
       },
     });

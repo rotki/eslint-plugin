@@ -17,8 +17,15 @@ const replacements = {
   },
 } as const;
 
-function hasReplacement(tag: string): tag is (keyof typeof replacements) {
-  return Object.prototype.hasOwnProperty.call(replacements, tag);
+const replacementMaps = new Map(
+  Object.entries(replacements).map(([tag, props]) => [
+    tag,
+    new Map(Object.entries(props).map(([prop, repl]) => [kebabCase(prop), { original: prop, replacement: repl }])),
+  ]),
+);
+
+function hasReplacement(tag: string): boolean {
+  return replacementMaps.has(tag);
 }
 
 function getPropName(node: VAST.VDirective | VAST.VAttribute): string | undefined {
@@ -52,22 +59,21 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
 
-        Object.entries(replacements[tag]).forEach(([prop, replacement]) => {
-          if (kebabCase(prop) === propName) {
-            debug(`preparing a replacement for ${tag}:${propName} -> ${replacement}`);
-            context.report({
-              data: {
-                prop,
-                replacement,
-              },
-              fix(fixer) {
-                return fixer.replaceText(propNameNode, replacement);
-              },
-              messageId: 'replacedWith',
-              node: propNameNode,
-            });
-          }
-        });
+        const match = replacementMaps.get(tag)?.get(propName);
+        if (match) {
+          debug(`preparing a replacement for ${tag}:${propName} -> ${match.replacement}`);
+          context.report({
+            data: {
+              prop: match.original,
+              replacement: match.replacement,
+            },
+            fix(fixer) {
+              return fixer.replaceText(propNameNode, match.replacement);
+            },
+            messageId: 'replacedWith',
+            node: propNameNode,
+          });
+        }
       },
     });
   },

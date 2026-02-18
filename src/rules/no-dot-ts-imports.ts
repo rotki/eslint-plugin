@@ -14,8 +14,7 @@ export default createEslintRule<Options, MessageIds>({
         if (!importDeclaration.endsWith('.ts'))
           return;
 
-        const lastIndexOfExtension = importDeclaration.lastIndexOf('.ts');
-        const replacement = importDeclaration.substring(0, lastIndexOfExtension);
+        const replacement = importDeclaration.slice(0, -3);
 
         context.report({
           data: {

@@ -48,9 +48,9 @@ const replacements = {
   ...vuetify,
 } as const;
 
-const skipInLegacy = [
+const skipInLegacy = new Set([
   'Fragment',
-];
+]);
 
 function hasReplacement(tag: string): tag is (keyof typeof replacements) {
   return Object.prototype.hasOwnProperty.call(replacements, tag);
@@ -60,20 +60,21 @@ export default createEslintRule<Options, MessageIds>({
   create(context, optionsWithDefault) {
     const options = optionsWithDefault[0] || {};
     const legacy = options.legacy;
+
+    const sourceCode = getSourceCode(context);
+    if (sourceCode?.parserServices && !('getTemplateBodyTokenStore' in sourceCode.parserServices))
+      throw new Error('cannot find getTemplateBodyTokenStore in parserServices');
+
     return defineTemplateBodyVisitor(context, {
       VElement(element: VElement) {
         const tag = pascalCase(element.rawName);
-
-        const sourceCode = getSourceCode(context);
-        if (sourceCode?.parserServices && !('getTemplateBodyTokenStore' in sourceCode.parserServices))
-          throw new Error('cannot find getTemplateBodyTokenStore in parserServices');
 
         if (!hasReplacement(tag))
           return;
 
         const replacement = replacements[tag];
 
-        if (replacement || (legacy && skipInLegacy.includes(tag))) {
+        if (replacement || (legacy && skipInLegacy.has(tag))) {
           debug(`${tag} has been deprecated`);
           context.report({
             data: {
