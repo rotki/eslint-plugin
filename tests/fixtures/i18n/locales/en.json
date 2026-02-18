@@ -1,0 +1,31 @@
+{
+  "used": {
+    "key": "Used value"
+  },
+  "unused": {
+    "key": "Unused value"
+  },
+  "check": {
+    "key": "Check value"
+  },
+  "template": {
+    "key": "Template value"
+  },
+  "comp": {
+    "key": "Component value"
+  },
+  "directive": {
+    "key": "Directive value"
+  },
+  "store": {
+    "key": "Store value"
+  },
+  "prefix": {
+    "one": "Prefix one",
+    "two": "Prefix two"
+  },
+  "linked": {
+    "source": "@:used.key"
+  },
+  "orphan": "Totally unused"
+}

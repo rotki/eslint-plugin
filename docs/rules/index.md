@@ -15,6 +15,7 @@
 | [@rotki/<wbr>no-deprecated-props](./no-deprecated-props.html) | Replaces deprecated props with their replacements | :star::black_nib: |
 | [@rotki/<wbr>no-dot-ts-imports](./no-dot-ts-imports.html) | Checks and replaces .ts extension in import statements. | :star::black_nib: |
 | [@rotki/<wbr>no-legacy-library-import](./no-legacy-library-import.html) | Reports and replaces imports of @rotki/ui-library-compat with @rotki/ui-library | :star::black_nib: |
+| [@rotki/<wbr>no-unused-i18n-keys](./no-unused-i18n-keys.html) | disallow unused i18n keys in locale files | :star::black_nib: |
 
 ## strict
 

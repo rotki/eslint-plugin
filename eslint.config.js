@@ -25,8 +25,13 @@ export default rotki({
     'unicorn/prefer-top-level-await': 'off',
   },
 }, {
-  files: ['**/*.?([cm])ts'],
+  files: ['**/*.?([cm])ts', '**/*.md'],
   rules: {
     'import/no-default-export': 'off',
+  },
+}, {
+  files: ['tests/**/*.ts'],
+  rules: {
+    'max-lines': ['error', { max: 1000 }],
   },
 });

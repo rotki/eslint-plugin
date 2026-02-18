@@ -1,7 +1,7 @@
 /**
  * Forked from https://github.com/intlify/eslint-plugin-vue-i18n/blob/master/scripts/update-rule-docs.ts
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as url from 'node:url';
 import createDebug from 'debug';
@@ -144,6 +144,9 @@ class DocFile {
 
   updateFooter() {
     const { name } = this.rule;
+    const dirname = url.fileURLToPath(new URL('.', import.meta.url));
+    const isDirectory = existsSync(join(dirname, `../src/rules/${name}/index.ts`));
+    const rulePath = isDirectory ? `${name}/index.ts` : `${name}.ts`;
     const footerPattern = /## (?::mag: Implementation|:rocket: Version).+$/s;
     const footer = `${
       this.since
@@ -155,7 +158,7 @@ This rule was introduced in \`@rotki/eslint-plugin\` ${this.since}
         : ''
     }## :mag: Implementation
 
-- [Rule source](https://github.com/rotki/eslint-plugin/blob/master/src/rules/${name}.ts)
+- [Rule source](https://github.com/rotki/eslint-plugin/blob/master/src/rules/${rulePath})
 - [Test source](https://github.com/rotki/eslint-plugin/tree/master/tests/rules/${name}.ts)
 `;
     if (footerPattern.test(this.content))

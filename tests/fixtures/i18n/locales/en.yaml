@@ -1,0 +1,9 @@
+used:
+  key: Used value
+unused:
+  key: Unused value
+check:
+  key: Check value
+store:
+  key: Store value
+orphan: Totally unused
