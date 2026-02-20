@@ -4,6 +4,8 @@ export * from './assertions';
 
 export * from './compat';
 
+export * from './composable';
+
 export * from './config';
 
 export * from './node';

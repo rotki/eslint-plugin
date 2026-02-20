@@ -22,9 +22,17 @@
 <!--prettier-ignore-->
 | Rule ID | Description |    |
 |:--------|:------------|:---|
+| [@rotki/<wbr>composable-no-default-export](./composable-no-default-export.html) | Forbid default exports in files containing composables |  |
+| [@rotki/<wbr>composable-prefer-shallowref](./composable-prefer-shallowref.html) | Prefer shallowRef() over ref() for primitive values in composables | :black_nib: |
+| [@rotki/<wbr>composable-require-cleanup](./composable-require-cleanup.html) | Require cleanup hooks when composables use side effects |  |
+| [@rotki/<wbr>composable-return-readonly](./composable-return-readonly.html) | Require returned refs from composables to be wrapped with readonly() | :black_nib: |
+| [@rotki/<wbr>composable-ssr-safety](./composable-ssr-safety.html) | Require browser global access in composables to be SSR-safe |  |
 
 ## stylistic
 
 <!--prettier-ignore-->
 | Rule ID | Description |    |
 |:--------|:------------|:---|
+| [@rotki/<wbr>composable-input-flexibility](./composable-input-flexibility.html) | Prefer MaybeRefOrGetter over Ref for composable parameters | :black_nib: |
+| [@rotki/<wbr>composable-naming-convention](./composable-naming-convention.html) | Enforce consistent naming for composable options and return types |  |
+| [@rotki/<wbr>require-jsdoc-on-composable-options](./require-jsdoc-on-composable-options.html) | Require JSDoc comments on composable options interface properties |  |
