@@ -49,12 +49,19 @@ tester.run('composable-input-flexibility', rule as never, {
           return { count: 0 };
         }
       `,
-      output: `
+      errors: [{
+        messageId: 'preferMaybeRefOrGetter',
+        suggestions: [
+          {
+            messageId: 'suggestMaybeRefOrGetter',
+            output: `
         function useCounter(value: MaybeRefOrGetter<number>) {
           return { count: 0 };
         }
       `,
-      errors: [{ messageId: 'preferMaybeRefOrGetter' }],
+          },
+        ],
+      }],
     },
     {
       filename: 'test.ts',
@@ -63,10 +70,33 @@ tester.run('composable-input-flexibility', rule as never, {
           return { label: text };
         };
       `,
-      output: `
+      errors: [{
+        messageId: 'preferMaybeRefOrGetter',
+        suggestions: [
+          {
+            messageId: 'suggestMaybeRefOrGetter',
+            output: `
         const useLabel = (text: MaybeRefOrGetter<string>) => {
           return { label: text };
         };
+      `,
+          },
+        ],
+      }],
+    },
+    // With autofix enabled
+    {
+      filename: 'test.ts',
+      options: [{ autofix: true }],
+      code: `
+        function useCounter(value: Ref<number>) {
+          return { count: 0 };
+        }
+      `,
+      output: `
+        function useCounter(value: MaybeRefOrGetter<number>) {
+          return { count: 0 };
+        }
       `,
       errors: [{ messageId: 'preferMaybeRefOrGetter' }],
     },

@@ -54,13 +54,20 @@ tester.run('composable-return-readonly', rule as never, {
           return { count };
         }
       `,
-      output: `
+      errors: [{
+        messageId: 'wrapReadonly',
+        suggestions: [
+          {
+            messageId: 'suggestWrapReadonly',
+            output: `
         function useCounter() {
           const count = ref(0);
           return { count: readonly(count) };
         }
       `,
-      errors: [{ messageId: 'wrapReadonly' }],
+          },
+        ],
+      }],
     },
     {
       filename: 'test.ts',
@@ -71,16 +78,37 @@ tester.run('composable-return-readonly', rule as never, {
           return { count, double };
         }
       `,
-      output: `
+      errors: [
+        {
+          messageId: 'wrapReadonly',
+          suggestions: [
+            {
+              messageId: 'suggestWrapReadonly',
+              output: `
         function useCounter() {
           const count = ref(0);
           const double = computed(() => count.value * 2);
-          return { count: readonly(count), double: readonly(double) };
+          return { count: readonly(count), double };
         }
       `,
-      errors: [
-        { messageId: 'wrapReadonly' },
-        { messageId: 'wrapReadonly' },
+            },
+          ],
+        },
+        {
+          messageId: 'wrapReadonly',
+          suggestions: [
+            {
+              messageId: 'suggestWrapReadonly',
+              output: `
+        function useCounter() {
+          const count = ref(0);
+          const double = computed(() => count.value * 2);
+          return { count, double: readonly(double) };
+        }
+      `,
+            },
+          ],
+        },
       ],
     },
     {
@@ -91,11 +119,36 @@ tester.run('composable-return-readonly', rule as never, {
           return { active };
         };
       `,
-      output: `
+      errors: [{
+        messageId: 'wrapReadonly',
+        suggestions: [
+          {
+            messageId: 'suggestWrapReadonly',
+            output: `
         const useToggle = () => {
           const active = shallowRef(false);
           return { active: readonly(active) };
         };
+      `,
+          },
+        ],
+      }],
+    },
+    // With autofix enabled
+    {
+      filename: 'test.ts',
+      options: [{ autofix: true }],
+      code: `
+        function useCounter() {
+          const count = ref(0);
+          return { count };
+        }
+      `,
+      output: `
+        function useCounter() {
+          const count = ref(0);
+          return { count: readonly(count) };
+        }
       `,
       errors: [{ messageId: 'wrapReadonly' }],
     },

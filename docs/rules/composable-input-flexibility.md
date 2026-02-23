@@ -8,7 +8,8 @@ since: v1.3.0
 
 > Prefer MaybeRefOrGetter over Ref for composable parameters
 
-- :black_nib:️ The `--fix` option on the [command line](http://eslint.org/docs/user-guide/command-line-interface#fix) can automatically fix some of the problems reported by this rule.
+- :bulb: Some problems reported by this rule are manually fixable by editor [suggestions](https://eslint.org/docs/developer-guide/working-with-rules#providing-suggestions).
+- :black_nib:️ The `--fix` option on the [command line](http://eslint.org/docs/user-guide/command-line-interface#fix) can automatically fix some of the problems reported by this rule when `autofix` is enabled.
 
 ## :book: Rule Details
 
@@ -33,6 +34,21 @@ function useCounter(value: Ref<number>) {
 ```
 
 </eslint-code-block>
+
+## :wrench: Options
+
+```json
+{
+  "@rotki/composable-input-flexibility": ["error", { "autofix": false }]
+}
+```
+
+### `autofix`
+
+- Type: `boolean`
+- Default: `false`
+
+When `true`, enables auto-fix via the `--fix` CLI flag. When `false` (default), the fix is available only as an editor suggestion.
 
 ## :rocket: Version
 

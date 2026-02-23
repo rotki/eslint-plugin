@@ -3,14 +3,15 @@ import { createEslintRule, getEnclosingComposable, getSourceCode } from '../util
 
 export const RULE_NAME = 'composable-return-readonly';
 
-export type MessageIds = 'wrapReadonly';
+export type MessageIds = 'suggestWrapReadonly' | 'wrapReadonly';
 
-export type Options = [];
+export type Options = [{ autofix?: boolean }];
 
 const REACTIVE_CREATORS = new Set(['ref', 'shallowRef', 'computed']);
 
 export default createEslintRule<Options, MessageIds>({
   create(context) {
+    const autofix = context.options[0]?.autofix ?? false;
     const source = getSourceCode(context);
     const reactiveVars = new Set<string>();
 
@@ -28,22 +29,24 @@ export default createEslintRule<Options, MessageIds>({
 
           if (prop.shorthand && prop.key.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.key.name)) {
             const keyName = prop.key.name;
+            const fixFn = (fixer: any) => fixer.replaceText(prop as any, `${keyName}: readonly(${keyName})`);
             context.report({
               data: { name: keyName },
-              fix(fixer) {
-                return fixer.replaceText(prop as any, `${keyName}: readonly(${keyName})`);
-              },
+              ...(autofix
+                ? { fix: fixFn }
+                : { suggest: [{ data: { name: keyName }, fix: fixFn, messageId: 'suggestWrapReadonly' as const }] }),
               messageId: 'wrapReadonly',
               node: prop,
             });
           }
           else if (!prop.shorthand && prop.value.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.value.name)) {
-            // Check not already wrapped in readonly()
+            const valueName = prop.value.name;
+            const fixFn = (fixer: any) => fixer.replaceText(prop.value as any, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value as any)})`);
             context.report({
-              data: { name: prop.value.name },
-              fix(fixer) {
-                return fixer.replaceText(prop.value as any, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value as any)})`);
-              },
+              data: { name: valueName },
+              ...(autofix
+                ? { fix: fixFn }
+                : { suggest: [{ data: { name: valueName }, fix: fixFn, messageId: 'suggestWrapReadonly' as const }] }),
               messageId: 'wrapReadonly',
               node: prop,
             });
@@ -65,17 +68,31 @@ export default createEslintRule<Options, MessageIds>({
       },
     };
   },
-  defaultOptions: [],
+  defaultOptions: [{ autofix: false }],
   meta: {
     docs: {
       description: 'Require returned refs from composables to be wrapped with readonly()',
       recommendation: 'strict',
     },
     fixable: 'code',
+    hasSuggestions: true,
     messages: {
+      suggestWrapReadonly: 'Wrap \'{{ name }}\' with readonly().',
       wrapReadonly: 'Returned ref \'{{ name }}\' should be wrapped with readonly().',
     },
-    schema: [],
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          autofix: {
+            default: false,
+            description: 'Enable auto-fix. When disabled, the fix is available as a suggestion.',
+            type: 'boolean',
+          },
+        },
+        type: 'object',
+      },
+    ],
     type: 'suggestion',
   },
   name: RULE_NAME,

@@ -3,9 +3,9 @@ import { createEslintRule, isComposableName } from '../utils';
 
 export const RULE_NAME = 'composable-input-flexibility';
 
-export type MessageIds = 'preferMaybeRefOrGetter';
+export type MessageIds = 'preferMaybeRefOrGetter' | 'suggestMaybeRefOrGetter';
 
-export type Options = [];
+export type Options = [{ autofix?: boolean }];
 
 function checkParamForRef(param: TSESTree.Parameter): TSESTree.TSTypeReference | undefined {
   let annotation: TSESTree.TypeNode | undefined;
@@ -30,6 +30,8 @@ function checkParamForRef(param: TSESTree.Parameter): TSESTree.TSTypeReference |
 
 export default createEslintRule<Options, MessageIds>({
   create(context) {
+    const autofix = context.options[0]?.autofix ?? false;
+
     return {
       FunctionDeclaration: (node: TSESTree.FunctionDeclaration) => {
         if (!node.id || !isComposableName(node.id.name))
@@ -53,9 +55,20 @@ export default createEslintRule<Options, MessageIds>({
         const refType = checkParamForRef(param);
         if (refType) {
           context.report({
-            fix(fixer) {
-              return fixer.replaceText(refType.typeName as any, 'MaybeRefOrGetter');
-            },
+            ...(autofix
+              ? {
+                  fix(fixer) {
+                    return fixer.replaceText(refType.typeName as any, 'MaybeRefOrGetter');
+                  },
+                }
+              : {
+                  suggest: [{
+                    fix(fixer) {
+                      return fixer.replaceText(refType.typeName as any, 'MaybeRefOrGetter');
+                    },
+                    messageId: 'suggestMaybeRefOrGetter',
+                  }],
+                }),
             messageId: 'preferMaybeRefOrGetter',
             node: refType,
           });
@@ -63,17 +76,31 @@ export default createEslintRule<Options, MessageIds>({
       }
     }
   },
-  defaultOptions: [],
+  defaultOptions: [{ autofix: false }],
   meta: {
     docs: {
       description: 'Prefer MaybeRefOrGetter over Ref for composable parameters',
       recommendation: 'stylistic',
     },
     fixable: 'code',
+    hasSuggestions: true,
     messages: {
       preferMaybeRefOrGetter: 'Use MaybeRefOrGetter<T> instead of Ref<T> for composable parameters to increase input flexibility.',
+      suggestMaybeRefOrGetter: 'Replace Ref<T> with MaybeRefOrGetter<T>.',
     },
-    schema: [],
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          autofix: {
+            default: false,
+            description: 'Enable auto-fix. When disabled, the fix is available as a suggestion.',
+            type: 'boolean',
+          },
+        },
+        type: 'object',
+      },
+    ],
     type: 'suggestion',
   },
   name: RULE_NAME,

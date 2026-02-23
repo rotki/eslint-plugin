@@ -62,13 +62,20 @@ tester.run('composable-prefer-shallowref', rule as never, {
           return { count };
         }
       `,
-      output: `
+      errors: [{
+        messageId: 'preferShallowRef',
+        suggestions: [
+          {
+            messageId: 'suggestShallowRef',
+            output: `
         function useCounter() {
           const count = shallowRef(0);
           return { count };
         }
       `,
-      errors: [{ messageId: 'preferShallowRef' }],
+          },
+        ],
+      }],
     },
     {
       filename: 'test.ts',
@@ -78,13 +85,20 @@ tester.run('composable-prefer-shallowref', rule as never, {
           return { active };
         }
       `,
-      output: `
+      errors: [{
+        messageId: 'preferShallowRef',
+        suggestions: [
+          {
+            messageId: 'suggestShallowRef',
+            output: `
         function useToggle() {
           const active = shallowRef(false);
           return { active };
         }
       `,
-      errors: [{ messageId: 'preferShallowRef' }],
+          },
+        ],
+      }],
     },
     {
       filename: 'test.ts',
@@ -94,11 +108,36 @@ tester.run('composable-prefer-shallowref', rule as never, {
           return { label };
         };
       `,
-      output: `
+      errors: [{
+        messageId: 'preferShallowRef',
+        suggestions: [
+          {
+            messageId: 'suggestShallowRef',
+            output: `
         const useLabel = () => {
           const label = shallowRef('hello');
           return { label };
         };
+      `,
+          },
+        ],
+      }],
+    },
+    // With autofix enabled
+    {
+      filename: 'test.ts',
+      options: [{ autofix: true }],
+      code: `
+        function useCounter() {
+          const count = ref(0);
+          return { count };
+        }
+      `,
+      output: `
+        function useCounter() {
+          const count = shallowRef(0);
+          return { count };
+        }
       `,
       errors: [{ messageId: 'preferShallowRef' }],
     },
