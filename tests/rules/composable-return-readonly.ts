@@ -44,6 +44,27 @@ tester.run('composable-return-readonly', rule as never, {
         }
       `,
     },
+    {
+      // Computed returned directly — already readonly, should not flag
+      filename: 'test.ts',
+      code: `
+        function useCounter() {
+          const count = ref(0);
+          const double = computed(() => count.value * 2);
+          return { count: readonly(count), double };
+        }
+      `,
+    },
+    {
+      // Computed returned with shorthand — already readonly, should not flag
+      filename: 'test.ts',
+      code: `
+        function useDouble() {
+          const double = computed(() => 2);
+          return { double };
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -70,6 +91,7 @@ tester.run('composable-return-readonly', rule as never, {
       }],
     },
     {
+      // Only ref should be flagged, computed should not
       filename: 'test.ts',
       code: `
         function useCounter() {
@@ -89,21 +111,6 @@ tester.run('composable-return-readonly', rule as never, {
           const count = ref(0);
           const double = computed(() => count.value * 2);
           return { count: readonly(count), double };
-        }
-      `,
-            },
-          ],
-        },
-        {
-          messageId: 'wrapReadonly',
-          suggestions: [
-            {
-              messageId: 'suggestWrapReadonly',
-              output: `
-        function useCounter() {
-          const count = ref(0);
-          const double = computed(() => count.value * 2);
-          return { count, double: readonly(double) };
         }
       `,
             },
@@ -151,6 +158,48 @@ tester.run('composable-return-readonly', rule as never, {
         }
       `,
       errors: [{ messageId: 'wrapReadonly' }],
+    },
+    // Unnecessary readonly() on computed — should flag
+    {
+      filename: 'test.ts',
+      code: `
+        function useCounter() {
+          const double = computed(() => 2);
+          return { double: readonly(double) };
+        }
+      `,
+      errors: [{
+        messageId: 'unnecessaryReadonly',
+        suggestions: [
+          {
+            messageId: 'suggestRemoveReadonly',
+            output: `
+        function useCounter() {
+          const double = computed(() => 2);
+          return { double: double };
+        }
+      `,
+          },
+        ],
+      }],
+    },
+    // Unnecessary readonly() on computed with autofix
+    {
+      filename: 'test.ts',
+      options: [{ autofix: true }],
+      code: `
+        function useDouble() {
+          const double = computed(() => 2);
+          return { value: readonly(double) };
+        }
+      `,
+      output: `
+        function useDouble() {
+          const double = computed(() => 2);
+          return { value: double };
+        }
+      `,
+      errors: [{ messageId: 'unnecessaryReadonly' }],
     },
   ],
 });

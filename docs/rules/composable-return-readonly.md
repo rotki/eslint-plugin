@@ -13,7 +13,9 @@ since: v1.3.0
 
 ## :book: Rule Details
 
-This rule requires that reactive variables (`ref`, `shallowRef`, `computed`) returned from composables are wrapped with `readonly()` to prevent consumers from mutating internal state.
+This rule requires that writable reactive variables (`ref`, `shallowRef`) returned from composables are wrapped with `readonly()` to prevent consumers from mutating internal state.
+
+`computed()` refs are **excluded** because they are already readonly by design — wrapping them with `readonly()` is unnecessary. The rule will flag unnecessary `readonly()` usage on computed refs.
 
 <eslint-code-block fix>
 
@@ -26,11 +28,14 @@ function useCounter() {
   const count = ref(0);
   const double = computed(() => count.value * 2);
 
-  // ✓ GOOD
-  return { count: readonly(count), double: readonly(double) };
+  // ✓ GOOD — ref wrapped with readonly, computed returned directly
+  return { count: readonly(count), double };
 
-  // ✗ BAD
+  // ✗ BAD — ref returned without readonly
   return { count, double };
+
+  // ✗ BAD — unnecessary readonly on computed
+  return { count: readonly(count), double: readonly(double) };
 }
 ```
 
