@@ -30,6 +30,11 @@ export default rotki({
     'import/no-default-export': 'off',
   },
 }, {
+  files: ['**/*.yml', '**/*.yaml'],
+  rules: {
+    '@stylistic/spaced-comment': 'off',
+  },
+}, {
   files: ['tests/**/*.ts'],
   rules: {
     'max-lines': ['error', { max: 1000 }],
