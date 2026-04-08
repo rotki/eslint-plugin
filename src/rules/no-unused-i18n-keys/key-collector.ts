@@ -36,56 +36,49 @@ function parseSourceFile(content: string, filePath: string): AST.ESLintProgram |
   }
 }
 
-function collectKeysFromFile(filePath: string): Set<string> {
-  const keys = new Set<string>();
-
-  let mtimeMs: number;
+function readFileWithMtime(filePath: string): { content: string; mtimeMs: number } | undefined {
   try {
-    mtimeMs = statSync(filePath).mtimeMs;
+    const mtimeMs = statSync(filePath).mtimeMs;
+    const content = readFileSync(filePath, 'utf-8');
+    return { content, mtimeMs };
   }
   catch {
-    return keys;
+    return undefined;
   }
+}
+
+function extractKeysFromAst(ast: AST.ESLintProgram, content: string, isVue: boolean, keys: Set<string>): void {
+  if (isVue) {
+    if (ast.templateBody)
+      extractKeysFromVueTemplate(ast.templateBody, keys);
+    extractKeysFromSfcI18nBlock(content, keys);
+  }
+  if (ast.body) {
+    for (const node of ast.body)
+      walkTsAst(node, keys);
+  }
+}
+
+function collectKeysFromFile(filePath: string): Set<string> {
+  const file = readFileWithMtime(filePath);
+  if (!file)
+    return new Set();
 
   const cached = fileCache.get(filePath);
-  if (cached && cached.mtimeMs === mtimeMs) {
+  if (cached && cached.mtimeMs === file.mtimeMs)
     return cached.keys;
-  }
 
-  let content: string;
-  try {
-    content = readFileSync(filePath, 'utf-8');
-  }
-  catch {
-    return keys;
-  }
-
+  const keys = new Set<string>();
   const isVue = filePath.endsWith('.vue');
   const pattern = isVue ? VUE_I18N_PATTERN : I18N_CALL_PATTERN;
 
-  if (!pattern.test(content)) {
-    fileCache.set(filePath, { keys, mtimeMs });
-    return keys;
+  if (pattern.test(file.content)) {
+    const ast = parseSourceFile(file.content, filePath);
+    if (ast)
+      extractKeysFromAst(ast, file.content, isVue, keys);
   }
 
-  const ast = parseSourceFile(content, filePath);
-  if (!ast)
-    return keys;
-
-  if (isVue) {
-    if (ast.templateBody) {
-      extractKeysFromVueTemplate(ast.templateBody, keys);
-    }
-    extractKeysFromSfcI18nBlock(content, keys);
-  }
-
-  if (ast.body) {
-    for (const node of ast.body) {
-      walkTsAst(node, keys);
-    }
-  }
-
-  fileCache.set(filePath, { keys, mtimeMs });
+  fileCache.set(filePath, { keys, mtimeMs: file.mtimeMs });
   return keys;
 }
 

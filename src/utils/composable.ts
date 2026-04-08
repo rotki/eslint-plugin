@@ -21,19 +21,25 @@ export function getFunctionName(node: TSESTree.Node): string | undefined {
   return undefined;
 }
 
+function isComposableNode(node: TSESTree.Node): node is TSESTree.FunctionDeclaration | TSESTree.ArrowFunctionExpression | TSESTree.FunctionExpression {
+  if (node.type === AST_NODE_TYPES.FunctionDeclaration)
+    return !!node.id && isComposableName(node.id.name);
+
+  if (node.type === AST_NODE_TYPES.ArrowFunctionExpression || node.type === AST_NODE_TYPES.FunctionExpression) {
+    const parent = node.parent;
+    return parent?.type === AST_NODE_TYPES.VariableDeclarator
+      && parent.id.type === AST_NODE_TYPES.Identifier
+      && isComposableName(parent.id.name);
+  }
+
+  return false;
+}
+
 export function getEnclosingComposable(node: TSESTree.Node): TSESTree.FunctionDeclaration | TSESTree.ArrowFunctionExpression | TSESTree.FunctionExpression | undefined {
   let current: TSESTree.Node | undefined = node.parent;
   while (current) {
-    if (current.type === AST_NODE_TYPES.FunctionDeclaration && current.id && isComposableName(current.id.name))
+    if (isComposableNode(current))
       return current;
-    if (current.type === AST_NODE_TYPES.ArrowFunctionExpression || current.type === AST_NODE_TYPES.FunctionExpression) {
-      const parent = current.parent;
-      if (parent?.type === AST_NODE_TYPES.VariableDeclarator
-        && parent.id.type === AST_NODE_TYPES.Identifier
-        && isComposableName(parent.id.name)) {
-        return current;
-      }
-    }
     current = current.parent;
   }
   return undefined;

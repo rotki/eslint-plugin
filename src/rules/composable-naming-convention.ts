@@ -47,6 +47,10 @@ export default createEslintRule<Options, MessageIds>({
       },
     };
 
+    function isMismatchedConvention(typeName: string | undefined, prefix: string, suffix: string, expected: string): typeName is string {
+      return !!typeName && typeName.startsWith(prefix) && typeName.endsWith(suffix) && typeName !== expected;
+    }
+
     function checkComposable(node: TSESTree.FunctionDeclaration | TSESTree.VariableDeclarator) {
       const info = getComposableFunction(node);
       if (!info)
@@ -56,32 +60,17 @@ export default createEslintRule<Options, MessageIds>({
       const expectedOptions = `Use${pascalName}Options`;
       const expectedReturn = `Use${pascalName}Return`;
 
-      // Check parameter type annotation (last param for options pattern)
       for (const param of info.params) {
         const annotation = getParamTypeAnnotation(param);
-        if (!annotation)
-          continue;
-
-        const typeName = getTypeReferenceName(annotation);
-        if (typeName && typeName.startsWith('Use') && typeName.endsWith('Options') && typeName !== expectedOptions) {
-          context.report({
-            data: { expected: expectedOptions, got: typeName },
-            messageId: 'optionsNaming',
-            node: param,
-          });
-        }
+        const typeName = annotation ? getTypeReferenceName(annotation) : undefined;
+        if (isMismatchedConvention(typeName, 'Use', 'Options', expectedOptions))
+          context.report({ data: { expected: expectedOptions, got: typeName }, messageId: 'optionsNaming', node: param });
       }
 
-      // Check return type annotation
       if (info.returnType) {
         const returnTypeName = getTypeReferenceName(info.returnType.typeAnnotation);
-        if (returnTypeName && returnTypeName.startsWith('Use') && returnTypeName.endsWith('Return') && returnTypeName !== expectedReturn) {
-          context.report({
-            data: { expected: expectedReturn, got: returnTypeName },
-            messageId: 'returnNaming',
-            node: info.returnType,
-          });
-        }
+        if (isMismatchedConvention(returnTypeName, 'Use', 'Return', expectedReturn))
+          context.report({ data: { expected: expectedReturn, got: returnTypeName }, messageId: 'returnNaming', node: info.returnType });
       }
     }
 

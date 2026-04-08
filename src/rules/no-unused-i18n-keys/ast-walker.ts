@@ -27,22 +27,44 @@ function isI18nCallExpression(node: AstNode): boolean {
     && I18N_MEMBER_NAMES.has(callee.property.name);
 }
 
-function getTemplateLiteralText(arg: AstNode): string | undefined {
-  const quasis = arg.quasis;
-  const expressions = arg.expressions;
-  if (!Array.isArray(quasis) || !Array.isArray(expressions) || quasis.length === 0)
+function getQuasiText(quasi: unknown): string | undefined {
+  if (!quasi || typeof quasi !== 'object' || !('value' in quasi))
     return undefined;
-
-  const firstQuasi: unknown = quasis[0];
-  if (!firstQuasi || typeof firstQuasi !== 'object' || !('value' in firstQuasi))
-    return undefined;
-  const quasiObj = firstQuasi.value;
+  const quasiObj = quasi.value;
   if (!quasiObj || typeof quasiObj !== 'object')
     return undefined;
   if ('cooked' in quasiObj && typeof quasiObj.cooked === 'string')
     return quasiObj.cooked;
   if ('raw' in quasiObj && typeof quasiObj.raw === 'string')
     return quasiObj.raw;
+  return undefined;
+}
+
+function getTemplateLiteralText(arg: AstNode): string | undefined {
+  const { expressions, quasis } = arg;
+  if (!Array.isArray(quasis) || !Array.isArray(expressions) || quasis.length === 0)
+    return undefined;
+  return getQuasiText(quasis[0]);
+}
+
+function isStaticTemplateLiteral(arg: AstNode): boolean {
+  return Array.isArray(arg.expressions) && arg.expressions.length === 0
+    && Array.isArray(arg.quasis) && arg.quasis.length === 1;
+}
+
+function extractKeyFromArg(arg: AstNode): string | undefined {
+  if (arg.type === 'Literal' && typeof arg.value === 'string')
+    return arg.value;
+
+  if (arg.type === 'TemplateLiteral') {
+    const text = getTemplateLiteralText(arg);
+    if (text === undefined)
+      return undefined;
+    if (isStaticTemplateLiteral(arg))
+      return text;
+    return text ? `${text}*` : undefined;
+  }
+
   return undefined;
 }
 
@@ -58,18 +80,9 @@ export function extractKeysFromCallExpression(node: AstNode, keys: Set<string>):
   if (!isAstNode(arg))
     return;
 
-  if (arg.type === 'Literal' && typeof arg.value === 'string') {
-    keys.add(arg.value);
-  }
-  else if (arg.type === 'TemplateLiteral') {
-    const text = getTemplateLiteralText(arg);
-    if (text === undefined)
-      return;
-    if (arg.expressions && Array.isArray(arg.expressions) && arg.expressions.length === 0 && Array.isArray(arg.quasis) && arg.quasis.length === 1)
-      keys.add(text);
-    else if (text)
-      keys.add(`${text}*`);
-  }
+  const key = extractKeyFromArg(arg);
+  if (key)
+    keys.add(key);
 }
 
 export const TS_AST_CHILD_KEYS = new Set([

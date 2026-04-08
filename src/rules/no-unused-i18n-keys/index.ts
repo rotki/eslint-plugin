@@ -23,22 +23,26 @@ function isLocaleFile(filename: string): boolean {
   return /(?:locales?|i18n|translations?|messages?|lang)\b/i.test(filename);
 }
 
-function isJsonProgram(ast: unknown): ast is JsonAST.JSONProgram {
-  if (!ast || typeof ast !== 'object' || !('type' in ast) || ast.type !== 'Program')
-    return false;
-  if (!('body' in ast) || !Array.isArray(ast.body) || ast.body.length === 0)
-    return false;
+function isProgramWithBody(ast: unknown): ast is { type: 'Program'; body: unknown[] } {
+  return !!ast && typeof ast === 'object' && 'type' in ast && ast.type === 'Program'
+    && 'body' in ast && Array.isArray(ast.body) && ast.body.length > 0;
+}
+
+function getProgramFirstBodyType(ast: unknown): string | undefined {
+  if (!isProgramWithBody(ast))
+    return undefined;
   const first: unknown = ast.body[0];
-  return first !== null && typeof first === 'object' && 'type' in first && first.type === 'JSONExpressionStatement';
+  if (!first || typeof first !== 'object' || !('type' in first) || typeof first.type !== 'string')
+    return undefined;
+  return first.type;
+}
+
+function isJsonProgram(ast: unknown): ast is JsonAST.JSONProgram {
+  return getProgramFirstBodyType(ast) === 'JSONExpressionStatement';
 }
 
 function isYamlProgram(ast: unknown): ast is YamlAST.YAMLProgram {
-  if (!ast || typeof ast !== 'object' || !('type' in ast) || ast.type !== 'Program')
-    return false;
-  if (!('body' in ast) || !Array.isArray(ast.body) || ast.body.length === 0)
-    return false;
-  const first: unknown = ast.body[0];
-  return first !== null && typeof first === 'object' && 'type' in first && first.type === 'YAMLDocument';
+  return getProgramFirstBodyType(ast) === 'YAMLDocument';
 }
 
 function buildJsonKeyPaths(node: JsonAST.JSONObjectExpression, prefix: string, paths: Array<{ key: string; node: JsonAST.JSONProperty }>): void {

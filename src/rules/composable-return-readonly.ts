@@ -26,6 +26,47 @@ export default createEslintRule<Options, MessageIds>({
     const reactiveVars = new Set<string>();
     const readonlyVars = new Set<string>();
 
+    function reportWithFixOrSuggest(
+      prop: TSESTree.Property,
+      name: string,
+      messageId: MessageIds,
+      suggestMessageId: 'suggestRemoveReadonly' | 'suggestWrapReadonly',
+      fixFn: ReportFixFunction,
+    ): void {
+      context.report({
+        data: { name },
+        ...(autofix
+          ? { fix: fixFn }
+          : { suggest: [{ data: { name }, fix: fixFn, messageId: suggestMessageId }] }),
+        messageId,
+        node: prop,
+      });
+    }
+
+    function checkUnnecessaryReadonly(prop: TSESTree.Property): boolean {
+      const valueNode = prop.shorthand ? null : prop.value;
+      if (!valueNode || !isReadonlyCall(valueNode))
+        return false;
+
+      const innerName = valueNode.arguments[0].name;
+      if (!readonlyVars.has(innerName))
+        return false;
+
+      reportWithFixOrSuggest(prop, innerName, 'unnecessaryReadonly', 'suggestRemoveReadonly', fixer => fixer.replaceText(valueNode, innerName));
+      return true;
+    }
+
+    function checkMissingReadonly(prop: TSESTree.Property): void {
+      if (prop.shorthand && prop.key.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.key.name)) {
+        const keyName = prop.key.name;
+        reportWithFixOrSuggest(prop, keyName, 'wrapReadonly', 'suggestWrapReadonly', fixer => fixer.replaceText(prop, `${keyName}: readonly(${keyName})`));
+      }
+      else if (!prop.shorthand && prop.value.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.value.name)) {
+        const valueName = prop.value.name;
+        reportWithFixOrSuggest(prop, valueName, 'wrapReadonly', 'suggestWrapReadonly', fixer => fixer.replaceText(prop.value, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value)})`));
+      }
+    }
+
     return {
       ReturnStatement: (node: TSESTree.ReturnStatement) => {
         if (!getEnclosingComposable(node))
@@ -38,49 +79,8 @@ export default createEslintRule<Options, MessageIds>({
           if (prop.type !== AST_NODE_TYPES.Property)
             continue;
 
-          // Check for unnecessary readonly() wrapping on computed refs
-          const valueNode = prop.shorthand ? null : prop.value;
-          if (valueNode && isReadonlyCall(valueNode)) {
-            const innerName = valueNode.arguments[0].name;
-            if (readonlyVars.has(innerName)) {
-              const fixFn: ReportFixFunction = fixer => fixer.replaceText(valueNode, innerName);
-              context.report({
-                data: { name: innerName },
-                ...(autofix
-                  ? { fix: fixFn }
-                  : { suggest: [{ data: { name: innerName }, fix: fixFn, messageId: 'suggestRemoveReadonly' as const }] }),
-                messageId: 'unnecessaryReadonly',
-                node: prop,
-              });
-              continue;
-            }
-          }
-
-          // Check for missing readonly() on writable refs
-          if (prop.shorthand && prop.key.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.key.name)) {
-            const keyName = prop.key.name;
-            const fixFn: ReportFixFunction = fixer => fixer.replaceText(prop, `${keyName}: readonly(${keyName})`);
-            context.report({
-              data: { name: keyName },
-              ...(autofix
-                ? { fix: fixFn }
-                : { suggest: [{ data: { name: keyName }, fix: fixFn, messageId: 'suggestWrapReadonly' as const }] }),
-              messageId: 'wrapReadonly',
-              node: prop,
-            });
-          }
-          else if (!prop.shorthand && prop.value.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.value.name)) {
-            const valueName = prop.value.name;
-            const fixFn: ReportFixFunction = fixer => fixer.replaceText(prop.value, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value)})`);
-            context.report({
-              data: { name: valueName },
-              ...(autofix
-                ? { fix: fixFn }
-                : { suggest: [{ data: { name: valueName }, fix: fixFn, messageId: 'suggestWrapReadonly' as const }] }),
-              messageId: 'wrapReadonly',
-              node: prop,
-            });
-          }
+          if (!checkUnnecessaryReadonly(prop))
+            checkMissingReadonly(prop);
         }
       },
       VariableDeclarator: (node: TSESTree.VariableDeclarator) => {

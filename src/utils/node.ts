@@ -2,29 +2,20 @@ import type { AST } from 'vue-eslint-parser';
 
 type ESLintNode = AST.ESLintNode;
 
+function getLiteralValue(node: ESLintNode & { type: 'Literal' }, stringOnly: boolean): string | null {
+  if (node.value == null)
+    return !stringOnly && node.bigint != null ? node.bigint : null;
+  if (typeof node.value === 'string')
+    return node.value;
+  return stringOnly ? null : String(node.value);
+}
+
 function getStringLiteralValue(node: ESLintNode, stringOnly: boolean = false) {
-  if (node.type === 'Literal') {
-    if (node.value == null) {
-      if (!stringOnly && node.bigint != null)
-        return node.bigint;
+  if (node.type === 'Literal')
+    return getLiteralValue(node, stringOnly);
 
-      return null;
-    }
-    if (typeof node.value === 'string')
-      return node.value;
-
-    if (!stringOnly)
-      return String(node.value);
-
-    return null;
-  }
-  if (
-    node.type === 'TemplateLiteral'
-    && node.expressions.length === 0
-    && node.quasis.length === 1
-  ) {
+  if (node.type === 'TemplateLiteral' && node.expressions.length === 0 && node.quasis.length === 1)
     return node.quasis[0].value.cooked;
-  }
 
   return null;
 }

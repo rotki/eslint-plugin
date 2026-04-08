@@ -14,6 +14,23 @@ export type Options = [{ allowInference: boolean }];
 
 const FIXABLE_METHODS = new Set<string>(['ref', 'computed']);
 
+function getFixableCallExpression(declaration: TSESTree.LetOrConstOrVarDeclarator): { callee: TSESTree.Identifier; init: TSESTree.CallExpression } | undefined {
+  const init = declaration.init;
+  if (!init || init.type !== TSESTree.AST_NODE_TYPES.CallExpression)
+    return undefined;
+  const callee = init.callee;
+  if (!callee || callee.type !== TSESTree.AST_NODE_TYPES.Identifier || !FIXABLE_METHODS.has(callee.name))
+    return undefined;
+  return { callee, init };
+}
+
+function getDeclarationTypeArguments(declaration: TSESTree.LetOrConstOrVarDeclarator): TSESTree.TSTypeParameterInstantiation | undefined {
+  const typeNode = declaration.id.typeAnnotation?.typeAnnotation;
+  if (typeNode?.type === TSESTree.AST_NODE_TYPES.TSTypeReference)
+    return typeNode.typeArguments;
+  return undefined;
+}
+
 function checkAssignmentDeclaration(
   context: Readonly<RuleContext<MessageIds, Options>>,
   source: ReturnType<typeof getSourceCode>,
@@ -21,63 +38,35 @@ function checkAssignmentDeclaration(
   declaration: TSESTree.LetOrConstOrVarDeclarator,
   allowInference: boolean,
 ): void {
-  let declarationTypeArguments: TSESTree.TSTypeParameterInstantiation | undefined;
-
-  const init = declaration.init;
-  if (!(init && init.type === TSESTree.AST_NODE_TYPES.CallExpression))
+  const call = getFixableCallExpression(declaration);
+  if (!call)
     return;
 
-  const callee = init.callee;
-
-  if (!(callee && callee.type === TSESTree.AST_NODE_TYPES.Identifier))
-    return;
-
-  if (!FIXABLE_METHODS.has(callee.name))
-    return;
-
+  const { callee, init } = call;
   const name = callee.name;
-
   debug(`found ${name}, checking type arguments`);
-  const initializationTypeArguments = init.typeArguments;
 
+  const initTypeArgs = init.typeArguments;
+  const declTypeArgs = getDeclarationTypeArguments(declaration);
   const typeAnnotation = declaration.id.typeAnnotation;
-  if (typeAnnotation) {
-    const typeNode = typeAnnotation.typeAnnotation;
-    if (typeNode && typeNode.type === TSESTree.AST_NODE_TYPES.TSTypeReference)
-      declarationTypeArguments = typeNode.typeArguments;
-  }
 
-  if (initializationTypeArguments && !declarationTypeArguments)
+  if (initTypeArgs && !declTypeArgs)
     return;
 
   debug(`generating report for ${name}`);
 
-  if ((!initializationTypeArguments && !declarationTypeArguments)) {
-    if (allowInference) {
-      debug('type inference is allowed');
-    }
-    else {
-      context.report({
-        data: {
-          name,
-        },
-        messageId: 'missingType',
-        node,
-      });
-    }
+  if (!initTypeArgs && !declTypeArgs) {
+    if (!allowInference)
+      context.report({ data: { name }, messageId: 'missingType', node });
     return;
   }
 
   context.report({
-    data: {
-      name,
-    },
+    data: { name },
     fix(fixer) {
       const fixes: RuleFix[] = [];
-
-      if (!initializationTypeArguments && callee)
-        fixes.push(fixer.insertTextAfter(callee, source.getText(declarationTypeArguments)));
-
+      if (!initTypeArgs && callee)
+        fixes.push(fixer.insertTextAfter(callee, source.getText(declTypeArgs)));
       if (typeAnnotation)
         fixes.push(fixer.remove(typeAnnotation));
       return fixes;

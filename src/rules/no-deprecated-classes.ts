@@ -134,69 +134,73 @@ interface FoundClass {
   position: number;
 }
 
+function splitClassNames(classNames: string, reportNode: ExpressionType | VAST.ESLintTemplateElement): FoundClass[] {
+  return classNames
+    .split(/\s+/)
+    .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode }));
+}
+
+function* extractFromObject(node: VAST.ESLintObjectExpression): IterableIterator<FoundClass> {
+  for (const prop of node.properties) {
+    if (prop.type !== 'Property')
+      continue;
+    const classNames = getStaticPropertyName(prop);
+    if (classNames)
+      yield* splitClassNames(classNames, prop.key);
+  }
+}
+
+function* extractFromArray(node: VAST.ESLintArrayExpression): IterableIterator<FoundClass> {
+  for (const element of node.elements) {
+    if (element == null || element.type === 'SpreadElement')
+      continue;
+    yield* extractClassNames(element);
+  }
+}
+
+function* extractFromTemplateLiteral(node: VAST.ESLintTemplateLiteral): IterableIterator<FoundClass> {
+  for (const templateElement of node.quasis) {
+    const classNames = templateElement.value.cooked;
+    if (classNames !== null)
+      yield* splitClassNames(classNames, templateElement);
+  }
+  for (const expr of node.expressions)
+    yield* extractClassNames(expr, true);
+}
+
+function* extractFromBinary(node: VAST.ESLintBinaryExpression): IterableIterator<FoundClass> {
+  if (node.operator !== '+')
+    return;
+  if (node.left.type !== 'PrivateIdentifier')
+    yield* extractClassNames(node.left, true);
+  yield* extractClassNames(node.right, true);
+}
+
 function* extractClassNames(
   node: ExpressionType,
   textOnly: boolean = false,
 ): IterableIterator<FoundClass> {
   if (node.type === 'Literal') {
-    const classNames = `${node.value}`;
-    yield* classNames
-      .split(/\s+/)
-      .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: node }));
+    yield* splitClassNames(`${node.value}`, node);
     return;
   }
   if (node.type === 'TemplateLiteral') {
-    for (const templateElement of node.quasis) {
-      const classNames = templateElement.value.cooked;
-      if (classNames === null)
-        continue;
-
-      yield* classNames
-        .split(/\s+/)
-        .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: templateElement }));
-    }
-    for (const expr of node.expressions)
-      yield* extractClassNames(expr, true);
-
+    yield* extractFromTemplateLiteral(node);
     return;
   }
   if (node.type === 'BinaryExpression') {
-    if (node.operator !== '+')
-      return;
-
-    if (node.left.type !== 'PrivateIdentifier')
-      yield* extractClassNames(node.left, true);
-    yield* extractClassNames(node.right, true);
+    yield* extractFromBinary(node);
     return;
   }
   if (textOnly)
     return;
 
   if (node.type === 'ObjectExpression') {
-    for (const prop of node.properties) {
-      if (prop.type !== 'Property')
-        continue;
-
-      const classNames = getStaticPropertyName(prop);
-      if (!classNames)
-        continue;
-
-      yield* classNames
-        .split(/\s+/)
-        .map(className => ({ className, position: classNames.indexOf(className) + 1, reportNode: prop.key }));
-    }
+    yield* extractFromObject(node);
     return;
   }
   if (node.type === 'ArrayExpression') {
-    for (const element of node.elements) {
-      if (element == null)
-        continue;
-
-      if (element.type === 'SpreadElement')
-        continue;
-
-      yield* extractClassNames(element);
-    }
+    yield* extractFromArray(node);
   }
 
   if (node.type === 'ConditionalExpression') {

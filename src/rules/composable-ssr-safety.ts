@@ -45,22 +45,16 @@ function isInsideTypeofCheck(node: TSESTree.Node): boolean {
   return false;
 }
 
-function hasTypeofCheck(node: TSESTree.Node): boolean {
-  if (node.type === AST_NODE_TYPES.BinaryExpression) {
-    if (node.left.type === AST_NODE_TYPES.UnaryExpression
-      && node.left.operator === 'typeof'
-      && node.left.argument.type === AST_NODE_TYPES.Identifier
-      && BROWSER_GLOBALS.has(node.left.argument.name)) {
-      return true;
-    }
+function isTypeofBrowserGlobal(node: TSESTree.Node): boolean {
+  return node.type === AST_NODE_TYPES.UnaryExpression
+    && node.operator === 'typeof'
+    && node.argument.type === AST_NODE_TYPES.Identifier
+    && BROWSER_GLOBALS.has(node.argument.name);
+}
 
-    if (node.right.type === AST_NODE_TYPES.UnaryExpression
-      && node.right.operator === 'typeof'
-      && node.right.argument.type === AST_NODE_TYPES.Identifier
-      && BROWSER_GLOBALS.has(node.right.argument.name)) {
-      return true;
-    }
-  }
+function hasTypeofCheck(node: TSESTree.Node): boolean {
+  if (node.type === AST_NODE_TYPES.BinaryExpression)
+    return isTypeofBrowserGlobal(node.left) || isTypeofBrowserGlobal(node.right);
 
   if (node.type === AST_NODE_TYPES.LogicalExpression)
     return hasTypeofCheck(node.left) || hasTypeofCheck(node.right);

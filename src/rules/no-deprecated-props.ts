@@ -1,9 +1,6 @@
 import type { AST as VAST } from 'vue-eslint-parser';
-import createDebug from 'debug';
 import { kebabCase, pascalCase } from 'scule';
 import { createEslintRule, defineTemplateBodyVisitor } from '../utils';
-
-const debug = createDebug('@rotki/eslint-plugin:no-deprecated-props');
 
 export const RULE_NAME = 'no-deprecated-props';
 
@@ -37,43 +34,42 @@ function getPropName(node: VAST.VDirective | VAST.VAttribute): string | undefine
   return kebabCase(node.key.rawName);
 }
 
+function isNonBindDirective(node: VAST.VAttribute | VAST.VDirective): boolean {
+  return node.directive
+    && node.value?.type === 'VExpressionContainer'
+    && (node.key.name.name !== 'bind' || !node.key.argument);
+}
+
+function getPropNameNode(node: VAST.VAttribute | VAST.VDirective): VAST.VDirective['key']['argument'] | VAST.VIdentifier {
+  return node.directive ? node.key.argument : node.key;
+}
+
 export default createEslintRule<Options, MessageIds>({
   create(context) {
     return defineTemplateBodyVisitor(context, {
       VAttribute(node: VAST.VAttribute | VAST.VDirective) {
-        if (node.directive && (node.value?.type === 'VExpressionContainer' && (node.key.name.name !== 'bind' || !node.key.argument)))
+        if (isNonBindDirective(node))
           return;
 
         const tag = pascalCase(node.parent.parent.rawName);
-
         if (!hasReplacement(tag))
           return;
 
-        debug(`${tag} has replacement properties`);
-
         const propName = getPropName(node);
-        const propNameNode = node.directive ? node.key.argument : node.key;
-
-        if (!propName || !propNameNode) {
-          debug('could not get prop name and/or node');
+        const propNameNode = getPropNameNode(node);
+        if (!propName || !propNameNode)
           return;
-        }
 
         const match = replacementMaps.get(tag)?.get(propName);
-        if (match) {
-          debug(`preparing a replacement for ${tag}:${propName} -> ${match.replacement}`);
-          context.report({
-            data: {
-              prop: match.original,
-              replacement: match.replacement,
-            },
-            fix(fixer) {
-              return fixer.replaceText(propNameNode, match.replacement);
-            },
-            messageId: 'replacedWith',
-            node: propNameNode,
-          });
-        }
+        if (!match)
+          return;
+
+        context.report({
+          data: { prop: match.original, replacement: match.replacement },
+          fix: fixer => fixer.replaceText(propNameNode, match.replacement),
+          messageId: 'replacedWith',
+          node: propNameNode,
+        });
       },
     });
   },

@@ -43,41 +43,52 @@ export function extractKeysFromVueTemplate(templateBody: VAST.VElement, keys: Se
   walkVueTemplateNode(templateBody, keys);
 }
 
+function collectI18nTKeys(element: VAST.VElement, keys: Set<string>): void {
+  if (element.rawName !== 'i18n-t' && element.name !== 'i18n-t')
+    return;
+  for (const attr of element.startTag.attributes) {
+    if (isKeypathAttribute(attr))
+      keys.add(attr.value.value);
+  }
+}
+
+function collectAttributeKeys(element: VAST.VElement, keys: Set<string>): void {
+  for (const attr of element.startTag.attributes) {
+    const expr = getDirectiveExpression(attr);
+    if (!expr)
+      continue;
+
+    if (isVTDirective(attr) && expr.type === 'Literal' && typeof expr.value === 'string')
+      keys.add(expr.value);
+
+    walkTsAst(expr, keys);
+  }
+}
+
+function walkChildren(node: VNodeLike, keys: Set<string>): void {
+  if (!('children' in node) || !Array.isArray(node.children))
+    return;
+  for (const child of node.children) {
+    if (child && typeof child === 'object')
+      walkVueTemplateNode(child, keys);
+  }
+}
+
 function walkVueTemplateNode(node: VNodeLike, keys: Set<string>): void {
   if (!node || typeof node !== 'object')
     return;
 
   if (isVElement(node)) {
-    if (node.rawName === 'i18n-t' || node.name === 'i18n-t') {
-      for (const attr of node.startTag.attributes) {
-        if (isKeypathAttribute(attr))
-          keys.add(attr.value.value);
-      }
-    }
-
-    for (const attr of node.startTag.attributes) {
-      const expr = getDirectiveExpression(attr);
-      if (!expr)
-        continue;
-
-      if (isVTDirective(attr) && expr.type === 'Literal' && typeof expr.value === 'string')
-        keys.add(expr.value);
-
-      walkTsAst(expr, keys);
-    }
-
-    for (const child of node.children)
-      walkVueTemplateNode(child, keys);
+    collectI18nTKeys(node, keys);
+    collectAttributeKeys(node, keys);
+    walkChildren(node, keys);
   }
   else if (isVExpressionContainer(node)) {
     if (node.expression)
       walkTsAst(node.expression, keys);
   }
-  else if ('children' in node && Array.isArray(node.children)) {
-    for (const child of node.children) {
-      if (child && typeof child === 'object')
-        walkVueTemplateNode(child, keys);
-    }
+  else {
+    walkChildren(node, keys);
   }
 }
 

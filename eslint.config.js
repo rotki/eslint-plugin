@@ -25,7 +25,7 @@ export default rotki({
     'unicorn/prefer-top-level-await': 'off',
   },
 }, {
-  files: ['**/*.?([cm])ts', '**/*.md'],
+  files: ['**/*.?([cm])ts', '**/*.md', '**/*.md/**'],
   rules: {
     'import/no-default-export': 'off',
   },
