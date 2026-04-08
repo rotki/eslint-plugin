@@ -58,13 +58,13 @@ export default createEslintRule<Options, MessageIds>({
             ...(autofix
               ? {
                   fix(fixer) {
-                    return fixer.replaceText(refType.typeName as any, 'MaybeRefOrGetter');
+                    return fixer.replaceText(refType.typeName, 'MaybeRefOrGetter');
                   },
                 }
               : {
                   suggest: [{
                     fix(fixer) {
-                      return fixer.replaceText(refType.typeName as any, 'MaybeRefOrGetter');
+                      return fixer.replaceText(refType.typeName, 'MaybeRefOrGetter');
                     },
                     messageId: 'suggestMaybeRefOrGetter',
                   }],

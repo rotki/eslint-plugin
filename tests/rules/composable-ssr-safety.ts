@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-ssr-safety', rule as never, {
+tester.run('composable-ssr-safety', rule, {
   valid: [
     {
       filename: 'test.ts',

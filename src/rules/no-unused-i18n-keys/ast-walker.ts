@@ -39,9 +39,11 @@ function getTemplateLiteralText(arg: AstNode): string | undefined {
   const quasiObj = firstQuasi.value;
   if (!quasiObj || typeof quasiObj !== 'object')
     return undefined;
-  return ('cooked' in quasiObj && typeof quasiObj.cooked === 'string')
-    ? quasiObj.cooked
-    : ('raw' in quasiObj && typeof quasiObj.raw === 'string' ? quasiObj.raw : undefined);
+  if ('cooked' in quasiObj && typeof quasiObj.cooked === 'string')
+    return quasiObj.cooked;
+  if ('raw' in quasiObj && typeof quasiObj.raw === 'string')
+    return quasiObj.raw;
+  return undefined;
 }
 
 export function extractKeysFromCallExpression(node: AstNode, keys: Set<string>): void {

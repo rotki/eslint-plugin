@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('consistent-refs', rule as never, {
+tester.run('consistent-refs', rule, {
   valid: [
     {
       filename: 'test.vue',

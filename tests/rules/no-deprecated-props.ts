@@ -12,7 +12,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('no-deprecated-props', rule as never, {
+tester.run('no-deprecated-props', rule, {
   valid: [
     {
       filename: 'test.vue',

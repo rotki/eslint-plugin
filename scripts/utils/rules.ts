@@ -2,8 +2,6 @@
  * Forked from https://github.com/intlify/eslint-plugin-vue-i18n/blob/master/scripts/lib/rules.ts
  */
 
-import type { RuleMetaData } from '@typescript-eslint/utils/ts-eslint';
-import type { RuleRecommendationMeta } from '../../src/types';
 import plugin from '../../src/plugin';
 
 export interface RuleInfo {
@@ -19,21 +17,23 @@ export interface RuleInfo {
 
 export const rules = Object.entries(plugin.rules).map((rule) => {
   const name = rule[0];
-  // todo, maybe adjust the type and remove the cast?
-  const meta = rule[1].meta as RuleMetaData<'', RuleRecommendationMeta> | undefined;
+  const meta = rule[1].meta;
 
   if (!meta || !meta.docs)
     throw new Error('meta and meta.docs are not supposed to be missing did you forget to add them');
 
+  const { docs, fixable, deprecated, replacedBy } = meta;
+  const recommendation = 'recommendation' in docs ? String(docs.recommendation) : undefined;
+
   return {
     id: `@rotki/${name}`,
     name,
-    description: String(meta.docs.description),
-    category: String(meta.docs.recommendation),
-    recommended: meta.docs.recommendation === 'recommended',
-    fixable: Boolean(meta.fixable),
-    deprecated: Boolean(meta.deprecated),
-    replacedBy: meta.replacedBy ? [...meta.replacedBy] : null,
+    description: String(docs.description),
+    category: String(recommendation),
+    recommended: recommendation === 'recommended',
+    fixable: Boolean(fixable),
+    deprecated: Boolean(deprecated),
+    replacedBy: replacedBy ? [...replacedBy] : null,
   } satisfies RuleInfo;
 });
 

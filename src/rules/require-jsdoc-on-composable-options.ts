@@ -21,13 +21,13 @@ export default createEslintRule<Options, MessageIds>({
           if (member.type !== AST_NODE_TYPES.TSPropertySignature)
             continue;
 
-          const comments = source.getCommentsBefore(member as any);
+          const comments = source.getCommentsBefore(member);
           const hasJsdoc = comments.some(comment => comment.type === 'Block' && comment.value.startsWith('*'));
 
           if (!hasJsdoc) {
             const propertyName = member.key.type === AST_NODE_TYPES.Identifier
               ? member.key.name
-              : source.getText(member.key as any);
+              : source.getText(member.key);
 
             context.report({
               data: { interfaceName: node.id.name, property: propertyName },

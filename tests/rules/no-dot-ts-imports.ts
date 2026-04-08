@@ -12,7 +12,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('no-dot-ts-import', rule as never, {
+tester.run('no-dot-ts-import', rule, {
   valid: [
     {
       filename: 'test.vue',

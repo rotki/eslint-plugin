@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-no-default-export', rule as never, {
+tester.run('composable-no-default-export', rule, {
   valid: [
     {
       filename: 'use-counter.ts',

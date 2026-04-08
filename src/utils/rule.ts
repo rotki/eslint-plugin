@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-assertions -- Type assertions are necessary in this file to bridge between three independently-defined type systems (ESLint's @eslint/core, @typescript-eslint/utils, and vue-eslint-parser) that are structurally compatible at runtime but nominally incompatible in TypeScript. This can be revisited when @typescript-eslint/utils aligns with @eslint/core's RuleDefinition types. */
 import type {
   PluginRuleModule,
   RuleContext,
@@ -17,15 +18,13 @@ const blobUrl = 'https://rotki.github.io/eslint-plugin/rules/';
  * @returns Function to create a rule with the docs URL format.
  */
 function RuleCreator(urlCreator: (ruleName: string) => string) {
-  // This function will get much easier to call when this is merged https://github.com/Microsoft/TypeScript/pull/26349
-  // TODO - when the above PR lands; add type checking for the context.report `data` property
   return function createNamedRule<
     TOptions extends readonly unknown[],
     TMessageIds extends string,
   >({
     meta,
-      name,
-      ...rule
+    name,
+    ...rule
   }: Readonly<RuleWithMetaAndName<TOptions, TMessageIds>>): RuleModule<TMessageIds, TOptions> {
     return createRule<TOptions, TMessageIds>({
       meta: {

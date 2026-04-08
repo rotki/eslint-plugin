@@ -19,14 +19,14 @@ export interface RuleWithMetaAndName<TOptions extends readonly unknown[], TMessa
   name: string;
 }
 
-interface RuleFix {
+export interface RuleFix {
   range: Readonly<AST.Range>;
   text: string;
 }
 
-type NodeOrToken = TSESTree.Node | TSESTree.Token | Node;
+export type NodeOrToken = TSESTree.Node | TSESTree.Token | Node;
 
-interface RuleFixer {
+export interface RuleFixer {
   insertTextAfter: (nodeOrToken: NodeOrToken, text: string) => RuleFix;
   insertTextAfterRange: (range: Readonly<AST.Range>, text: string) => RuleFix;
   insertTextBefore: (nodeOrToken: NodeOrToken, text: string) => RuleFix;
@@ -37,37 +37,27 @@ interface RuleFixer {
   replaceTextRange: (range: Readonly<AST.Range>, text: string) => RuleFix;
 }
 
-interface SuggestionReportDescriptor<TMessageIds extends string> extends Omit<ReportDescriptorBase<TMessageIds>, 'fix'> {
-  readonly fix: ReportFixFunction;
-}
-
-type ReportFixFunction = (fixer: RuleFixer) => IterableIterator<RuleFix> | RuleFix | readonly RuleFix[] | null;
-
-type ReportSuggestionArray<TMessageIds extends string> = SuggestionReportDescriptor<TMessageIds>[];
+export type ReportFixFunction = (fixer: RuleFixer) => IterableIterator<RuleFix> | RuleFix | readonly RuleFix[] | null;
 
 type ReportDescriptorMessageData = Readonly<Record<string, unknown>>;
 
-interface ReportDescriptorBase<TMessageIds extends string> {
-  /**
-   * The parameters for the message string associated with `messageId`.
-   */
+interface SuggestionReportDescriptor<TMessageIds extends string> {
   readonly data?: ReportDescriptorMessageData;
-  /**
-   * The fixer function.
-   */
-  readonly fix?: ReportFixFunction | null;
-  /**
-   * The messageId which is being reported.
-   */
+  readonly fix: ReportFixFunction;
   readonly messageId: TMessageIds;
 }
 
-interface ReportDescriptorWithSuggestion<TMessageIds extends string> extends ReportDescriptorBase<TMessageIds> {
-  /**
-   * 6.7's Suggestions API
-   */
+type ReportSuggestionArray<TMessageIds extends string> = SuggestionReportDescriptor<TMessageIds>[];
+
+interface ReportDescriptorCommon<TMessageIds extends string> {
+  readonly data?: ReportDescriptorMessageData;
+  readonly fix?: ReportFixFunction | null;
   readonly suggest?: Readonly<ReportSuggestionArray<TMessageIds>> | null;
 }
+
+type ReportDescriptorWithSuggestion<TMessageIds extends string> =
+  | (ReportDescriptorCommon<TMessageIds> & { readonly messageId: TMessageIds })
+  | (ReportDescriptorCommon<TMessageIds> & { readonly message: string });
 
 interface ReportDescriptorNodeOptionalLoc {
   /**

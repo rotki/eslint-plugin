@@ -9,7 +9,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run(RULE_NAME, rule as never, {
+tester.run(RULE_NAME, rule, {
   valid: [
     '<template><div class="flex flex-col"/></template>',
     '<template><div class="block"/></template>',

@@ -11,7 +11,7 @@ function getComposableFunction(node: TSESTree.FunctionDeclaration | TSESTree.Var
   if (node.type === AST_NODE_TYPES.FunctionDeclaration) {
     if (!node.id || !isComposableName(node.id.name))
       return undefined;
-    return { fn: node, name: node.id.name, params: node.params, returnType: (node as any).returnType };
+    return { fn: node, name: node.id.name, params: node.params, returnType: node.returnType };
   }
 
   if (node.type === AST_NODE_TYPES.VariableDeclarator
@@ -21,7 +21,7 @@ function getComposableFunction(node: TSESTree.FunctionDeclaration | TSESTree.Var
     && (node.init.type === AST_NODE_TYPES.ArrowFunctionExpression
       || node.init.type === AST_NODE_TYPES.FunctionExpression)) {
     const fn = node.init;
-    return { fn, name: node.id.name, params: fn.params, returnType: (fn as any).returnType };
+    return { fn, name: node.id.name, params: fn.params, returnType: fn.returnType };
   }
 
   return undefined;

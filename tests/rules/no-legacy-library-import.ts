@@ -12,7 +12,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('no-legacy-library-import', rule as never, {
+tester.run('no-legacy-library-import', rule, {
   valid: [
     {
       filename: 'test.vue',

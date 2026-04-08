@@ -1,3 +1,4 @@
+import type { ReportFixFunction } from '../types';
 import { AST_NODE_TYPES, type TSESTree } from '@typescript-eslint/utils';
 import { createEslintRule, getEnclosingComposable, getSourceCode } from '../utils';
 
@@ -10,7 +11,7 @@ export type Options = [{ autofix?: boolean }];
 const REACTIVE_CREATORS = new Set(['ref', 'shallowRef']);
 const READONLY_CREATORS = new Set(['computed']);
 
-function isReadonlyCall(node: TSESTree.Expression): node is TSESTree.CallExpression & { arguments: [TSESTree.Identifier] } {
+function isReadonlyCall(node: TSESTree.Node): node is TSESTree.CallExpression & { arguments: [TSESTree.Identifier] } {
   return node.type === AST_NODE_TYPES.CallExpression
     && node.callee.type === AST_NODE_TYPES.Identifier
     && node.callee.name === 'readonly'
@@ -42,7 +43,7 @@ export default createEslintRule<Options, MessageIds>({
           if (valueNode && isReadonlyCall(valueNode)) {
             const innerName = valueNode.arguments[0].name;
             if (readonlyVars.has(innerName)) {
-              const fixFn = (fixer: any) => fixer.replaceText(valueNode as any, innerName);
+              const fixFn: ReportFixFunction = fixer => fixer.replaceText(valueNode, innerName);
               context.report({
                 data: { name: innerName },
                 ...(autofix
@@ -58,7 +59,7 @@ export default createEslintRule<Options, MessageIds>({
           // Check for missing readonly() on writable refs
           if (prop.shorthand && prop.key.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.key.name)) {
             const keyName = prop.key.name;
-            const fixFn = (fixer: any) => fixer.replaceText(prop as any, `${keyName}: readonly(${keyName})`);
+            const fixFn: ReportFixFunction = fixer => fixer.replaceText(prop, `${keyName}: readonly(${keyName})`);
             context.report({
               data: { name: keyName },
               ...(autofix
@@ -70,7 +71,7 @@ export default createEslintRule<Options, MessageIds>({
           }
           else if (!prop.shorthand && prop.value.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.value.name)) {
             const valueName = prop.value.name;
-            const fixFn = (fixer: any) => fixer.replaceText(prop.value as any, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value as any)})`);
+            const fixFn: ReportFixFunction = fixer => fixer.replaceText(prop.value, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value)})`);
             context.report({
               data: { name: valueName },
               ...(autofix

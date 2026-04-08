@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-input-flexibility', rule as never, {
+tester.run('composable-input-flexibility', rule, {
   valid: [
     {
       filename: 'test.ts',

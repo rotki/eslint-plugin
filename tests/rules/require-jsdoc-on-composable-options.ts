@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('require-jsdoc-on-composable-options', rule as never, {
+tester.run('require-jsdoc-on-composable-options', rule, {
   valid: [
     {
       filename: 'test.ts',

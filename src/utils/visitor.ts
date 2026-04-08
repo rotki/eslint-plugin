@@ -1,4 +1,4 @@
-import type { ReportDescriptor, RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
+import type { RuleContext, RuleListener, TemplateBodyVisitor } from '../types';
 import { extname } from 'node:path';
 import { getFilename, getSourceCode } from './compat';
 
@@ -31,7 +31,7 @@ export function defineTemplateBodyVisitor<
         loc: { column: 0, line: 1 },
         message:
           'Use the latest vue-eslint-parser. See also https://github.com/vuejs/eslint-plugin-vue#what-is-the-use-the-latest-vue-eslint-parser-error',
-      } as unknown as ReportDescriptor<TMessageIds>);
+      });
     }
     return {};
   }

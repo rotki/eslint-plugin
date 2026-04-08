@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-naming-convention', rule as never, {
+tester.run('composable-naming-convention', rule, {
   valid: [
     {
       filename: 'test.ts',

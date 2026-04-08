@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-return-readonly', rule as never, {
+tester.run('composable-return-readonly', rule, {
   valid: [
     {
       filename: 'test.ts',

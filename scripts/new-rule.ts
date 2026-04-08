@@ -1,9 +1,8 @@
-import { execSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
-
 /**
  * Forked from https://github.com/intlify/eslint-plugin-vue-i18n/blob/master/scripts/new-rule.ts
  */
+import { execSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import url from 'node:url';
@@ -71,7 +70,7 @@ const tester = new RuleTester({
 });
 
 
-tester.run("${ruleId}", rule as never, {
+tester.run("${ruleId}", rule, {
     valid: [
       {
         filename: 'test.vue',

@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('max-dependencies', rule as never, {
+tester.run('max-dependencies', rule, {
   valid: [
     {
       filename: 'test.vue',

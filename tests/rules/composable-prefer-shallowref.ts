@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-prefer-shallowref', rule as never, {
+tester.run('composable-prefer-shallowref', rule, {
   valid: [
     {
       filename: 'test.ts',

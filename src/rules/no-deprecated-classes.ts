@@ -164,7 +164,8 @@ function* extractClassNames(
     if (node.operator !== '+')
       return;
 
-    yield* extractClassNames(node.left as ESLintExpression, true);
+    if (node.left.type !== 'PrivateIdentifier')
+      yield* extractClassNames(node.left, true);
     yield* extractClassNames(node.right, true);
     return;
   }

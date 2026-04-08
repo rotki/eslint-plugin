@@ -12,7 +12,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('no-deprecated-components', rule as never, {
+tester.run('no-deprecated-components', rule, {
   valid: [],
   invalid: [
     {

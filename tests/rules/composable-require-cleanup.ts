@@ -13,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('composable-require-cleanup', rule as never, {
+tester.run('composable-require-cleanup', rule, {
   valid: [
     {
       filename: 'test.ts',
