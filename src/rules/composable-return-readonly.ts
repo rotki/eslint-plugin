@@ -6,7 +6,9 @@ export const RULE_NAME = 'composable-return-readonly';
 
 export type MessageIds = 'suggestRemoveReadonly' | 'suggestWrapReadonly' | 'unnecessaryReadonly' | 'wrapReadonly';
 
-export type Options = [{ autofix?: boolean }];
+export type Options = [{ autofix?: boolean; writablePrefixes?: string[] }];
+
+const DEFAULT_WRITABLE_PREFIXES = ['model'];
 
 const REACTIVE_CREATORS = new Set(['ref', 'shallowRef']);
 const READONLY_CREATORS = new Set(['computed']);
@@ -22,9 +24,23 @@ function isReadonlyCall(node: TSESTree.Node): node is TSESTree.CallExpression & 
 export default createEslintRule<Options, MessageIds>({
   create(context) {
     const autofix = context.options[0]?.autofix ?? false;
+    const writablePrefixes = context.options[0]?.writablePrefixes ?? DEFAULT_WRITABLE_PREFIXES;
     const source = getSourceCode(context);
     const reactiveVars = new Set<string>();
     const readonlyVars = new Set<string>();
+
+    function isWritableByConvention(name: string): boolean {
+      return writablePrefixes.some((prefix) => {
+        if (!name.startsWith(prefix))
+          return false;
+
+        // Require a strict camelCase boundary: the prefix must be the whole name
+        // or be followed by an uppercase letter (e.g. `model` matches `model` and
+        // `modelValue`, but not `models`).
+        const next = name[prefix.length];
+        return next === undefined || (next >= 'A' && next <= 'Z');
+      });
+    }
 
     function reportWithFixOrSuggest(
       prop: TSESTree.Property,
@@ -59,10 +75,16 @@ export default createEslintRule<Options, MessageIds>({
     function checkMissingReadonly(prop: TSESTree.Property): void {
       if (prop.shorthand && prop.key.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.key.name)) {
         const keyName = prop.key.name;
+        if (isWritableByConvention(keyName))
+          return;
+
         reportWithFixOrSuggest(prop, keyName, 'wrapReadonly', 'suggestWrapReadonly', fixer => fixer.replaceText(prop, `${keyName}: readonly(${keyName})`));
       }
       else if (!prop.shorthand && prop.value.type === AST_NODE_TYPES.Identifier && reactiveVars.has(prop.value.name)) {
         const valueName = prop.value.name;
+        if (isWritableByConvention(valueName))
+          return;
+
         reportWithFixOrSuggest(prop, valueName, 'wrapReadonly', 'suggestWrapReadonly', fixer => fixer.replaceText(prop.value, `readonly(${prop.value.type === AST_NODE_TYPES.Identifier ? prop.value.name : source.getText(prop.value)})`));
       }
     }
@@ -103,7 +125,7 @@ export default createEslintRule<Options, MessageIds>({
       },
     };
   },
-  defaultOptions: [{ autofix: false }],
+  defaultOptions: [{ autofix: false, writablePrefixes: DEFAULT_WRITABLE_PREFIXES }],
   meta: {
     docs: {
       description: 'Require returned refs from composables to be wrapped with readonly()',
@@ -125,6 +147,12 @@ export default createEslintRule<Options, MessageIds>({
             default: false,
             description: 'Enable auto-fix. When disabled, the fix is available as a suggestion.',
             type: 'boolean',
+          },
+          writablePrefixes: {
+            default: DEFAULT_WRITABLE_PREFIXES,
+            description: 'Returned variables whose name starts with one of these prefixes are exempt from the readonly() requirement (e.g. refs intended for v-model binding).',
+            items: { type: 'string' },
+            type: 'array',
           },
         },
         type: 'object',

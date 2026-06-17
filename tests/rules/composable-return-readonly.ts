@@ -65,6 +65,37 @@ tester.run('composable-return-readonly', rule, {
         }
       `,
     },
+    {
+      // Default `model` prefix — writable by convention, should not flag (shorthand)
+      filename: 'test.ts',
+      code: `
+        function useInput() {
+          const modelValue = ref('');
+          return { modelValue };
+        }
+      `,
+    },
+    {
+      // Default `model` prefix — writable by convention, should not flag (non-shorthand value)
+      filename: 'test.ts',
+      code: `
+        function useInput() {
+          const modelText = ref('');
+          return { text: modelText };
+        }
+      `,
+    },
+    {
+      // Custom prefixes — `writable` exempt
+      filename: 'test.ts',
+      options: [{ writablePrefixes: ['writable'] }],
+      code: `
+        function useToggle() {
+          const writableActive = shallowRef(false);
+          return { writableActive };
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -158,6 +189,55 @@ tester.run('composable-return-readonly', rule, {
         }
       `,
       errors: [{ messageId: 'wrapReadonly' }],
+    },
+    // Custom writablePrefixes replaces the default — `model` is no longer exempt
+    {
+      filename: 'test.ts',
+      options: [{ writablePrefixes: ['writable'] }],
+      code: `
+        function useInput() {
+          const modelValue = ref('');
+          return { modelValue };
+        }
+      `,
+      errors: [{
+        messageId: 'wrapReadonly',
+        suggestions: [
+          {
+            messageId: 'suggestWrapReadonly',
+            output: `
+        function useInput() {
+          const modelValue = ref('');
+          return { modelValue: readonly(modelValue) };
+        }
+      `,
+          },
+        ],
+      }],
+    },
+    // Prefix without a camelCase boundary — `models` is not exempt by `model`
+    {
+      filename: 'test.ts',
+      code: `
+        function useList() {
+          const models = ref([]);
+          return { models };
+        }
+      `,
+      errors: [{
+        messageId: 'wrapReadonly',
+        suggestions: [
+          {
+            messageId: 'suggestWrapReadonly',
+            output: `
+        function useList() {
+          const models = ref([]);
+          return { models: readonly(models) };
+        }
+      `,
+          },
+        ],
+      }],
     },
     // Unnecessary readonly() on computed — should flag
     {

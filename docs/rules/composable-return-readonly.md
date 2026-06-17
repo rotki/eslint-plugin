@@ -16,6 +16,8 @@ This rule requires that writable reactive variables (`ref`, `shallowRef`) return
 
 `computed()` refs are **excluded** because they are already readonly by design — wrapping them with `readonly()` is unnecessary. The rule will flag unnecessary `readonly()` usage on computed refs.
 
+Refs that are intentionally returned writable (for example, to bind with `v-model`) can be exempted by naming convention via the [`writablePrefixes`](#writableprefixes) option, instead of disabling the rule per line.
+
 <eslint-code-block fix>
 
 <!-- eslint-skip -->
@@ -44,7 +46,7 @@ function useCounter() {
 
 ```json
 {
-  "@rotki/composable-return-readonly": ["error", { "autofix": false }]
+  "@rotki/composable-return-readonly": ["error", { "autofix": false, "writablePrefixes": ["model"] }]
 }
 ```
 
@@ -54,6 +56,35 @@ function useCounter() {
 - Default: `false`
 
 When `true`, enables auto-fix via the `--fix` CLI flag. When `false` (default), the fix is available only as an editor suggestion.
+
+### `writablePrefixes`
+
+- Type: `string[]`
+- Default: `["model"]`
+
+Returned variables whose name starts with one of these prefixes are exempt from the `readonly()` requirement. Use this for refs you intentionally expose as writable — for example, a ref meant to be bound with `v-model` — so you don't need a per-line `eslint-disable`.
+
+Matching requires a strict camelCase boundary: the prefix must be the entire name or be followed by an uppercase letter. So `model` exempts `model` and `modelValue`, but **not** `models`.
+
+Providing this option **replaces** the default, so include the default value if you want to keep it alongside additions, e.g. `["model", "writable"]`.
+
+<eslint-code-block>
+
+<!-- eslint-skip -->
+
+```ts
+/* eslint @rotki/composable-return-readonly: ["error", { "writablePrefixes": ["model"] }] */
+
+function useInput() {
+  const modelValue = ref('');
+  const count = ref(0);
+
+  // ✓ GOOD — `modelValue` is exempt (writable by convention), `count` is wrapped
+  return { modelValue, count: readonly(count) };
+}
+```
+
+</eslint-code-block>
 
 ## :rocket: Version
 
