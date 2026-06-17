@@ -10,11 +10,11 @@ import { extractKeysFromSfcI18nBlock } from '../../src/rules/no-unused-i18n-keys
 const fixturesDir = join(__dirname, '..', 'fixtures', 'i18n');
 const srcDir = join(fixturesDir, 'src');
 
-const ruleOptions = [{
+const ruleOptions: { extensions: string[]; ignoreKeys: string[]; src: string }[] = [{
   extensions: ['.vue', '.ts'],
   ignoreKeys: [],
   src: srcDir,
-}] as const;
+}];
 
 const jsonTester = new RuleTester({
   languageOptions: {

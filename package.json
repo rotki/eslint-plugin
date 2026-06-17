@@ -45,7 +45,7 @@
     "release": "bumpp -r --no-push"
   },
   "peerDependencies": {
-    "eslint": "^9.20.0"
+    "eslint": "^9.20.0 || ^10.0.0"
   },
   "dependencies": {
     "@typescript-eslint/utils": "8.60.1",
@@ -68,7 +68,7 @@
     "@typescript-eslint/rule-tester": "8.60.1",
     "@vitest/coverage-v8": "4.1.8",
     "bumpp": "11.1.0",
-    "eslint": "9.39.4",
+    "eslint": "10.4.1",
     "husky": "9.1.7",
     "lint-staged": "17.0.7",
     "prettier": "3.8.1",
