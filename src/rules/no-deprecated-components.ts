@@ -53,7 +53,7 @@ const skipInLegacy = new Set([
 ]);
 
 function hasReplacement(tag: string): tag is (keyof typeof replacements) {
-  return Object.prototype.hasOwnProperty.call(replacements, tag);
+  return Object.hasOwn(replacements, tag);
 }
 
 export default createEslintRule<Options, MessageIds>({

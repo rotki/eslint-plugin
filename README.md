@@ -38,11 +38,9 @@ export default [
 
 Or configure individual rules:
 
-<!-- eslint-disable perfectionist/sort-imports -->
-
 ```js
-import * as jsoncParser from 'jsonc-eslint-parser';
 import rotkiPlugin from '@rotki/eslint-plugin';
+import * as jsoncParser from 'jsonc-eslint-parser';
 
 export default [
   {
@@ -61,8 +59,6 @@ export default [
   },
 ];
 ```
-
-<!-- eslint-enable perfectionist/sort-imports -->
 
 ## Rules
 
