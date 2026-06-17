@@ -1,5 +1,5 @@
 import type { ESLint } from 'eslint';
-import pkg from '../package.json' assert { type: 'json' };
+import pkg from '../package.json' with { type: 'json' };
 import composableInputFlexibility from './rules/composable-input-flexibility';
 import composableNamingConvention from './rules/composable-naming-convention';
 import composableNoDefaultExport from './rules/composable-no-default-export';
