@@ -8,8 +8,7 @@ since: v1.3.0
 
 > Prefer shallowRef() over ref() for primitive values in composables
 
-- :bulb: Some problems reported by this rule are manually fixable by editor [suggestions](https://eslint.org/docs/developer-guide/working-with-rules#providing-suggestions).
-- :black_nib:️ The `--fix` option on the [command line](http://eslint.org/docs/user-guide/command-line-interface#fix) can automatically fix some of the problems reported by this rule when `autofix` is enabled.
+- :black_nib:️ The `--fix` option on the [command line](http://eslint.org/docs/user-guide/command-line-interface#fix) can automatically fix some of the problems reported by this rule.
 
 ## :book: Rule Details
 
