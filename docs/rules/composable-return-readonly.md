@@ -46,7 +46,10 @@ function useCounter() {
 
 ```json
 {
-  "@rotki/composable-return-readonly": ["error", { "autofix": false, "writablePrefixes": ["model"] }]
+  "@rotki/composable-return-readonly": [
+    "error",
+    { "autofix": false, "writablePrefixes": ["model"] }
+  ]
 }
 ```
 
@@ -68,7 +71,7 @@ Matching requires a strict camelCase boundary: the prefix must be the entire nam
 
 Providing this option **replaces** the default, so include the default value if you want to keep it alongside additions, e.g. `["model", "writable"]`.
 
-<eslint-code-block>
+<eslint-code-block fix>
 
 <!-- eslint-skip -->
 
