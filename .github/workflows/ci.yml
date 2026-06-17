@@ -85,3 +85,39 @@ jobs:
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  eslint-compat:
+    name: eslint ${{ matrix.eslint }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        eslint: ['9', '10']
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
+
+      - name: Setup node env 🏗
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          cache: pnpm
+          node-version-file: .nvmrc
+
+      - name: Install dependencies 👨🏻‍💻
+        run: pnpm install --frozen-lockfile
+
+      - name: Install eslint ${{ matrix.eslint }}
+        run: pnpm add -D eslint@${{ matrix.eslint }}
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm exec vitest run
