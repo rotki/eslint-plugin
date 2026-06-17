@@ -62,16 +62,8 @@ export default [
 
 ## Rules
 
-| Rule                                                                                                         | Description                                                               | Fixable     |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------- |
-| [consistent-ref-type-annotation](https://rotki.github.io/eslint-plugin/rules/consistent-ref-type-annotation) | Ensures consistent type annotation position for ref, computed assignments | :black_nib: |
-| [max-dependencies](https://rotki.github.io/eslint-plugin/rules/max-dependencies)                             | Enforce a maximum number of dependencies per file                         |             |
-| [no-deprecated-classes](https://rotki.github.io/eslint-plugin/rules/no-deprecated-classes)                   | Disallow deprecated vuetify css classes                                   | :black_nib: |
-| [no-deprecated-components](https://rotki.github.io/eslint-plugin/rules/no-deprecated-components)             | Disallow deprecated components                                            | :black_nib: |
-| [no-deprecated-props](https://rotki.github.io/eslint-plugin/rules/no-deprecated-props)                       | Replace deprecated props with their replacements                          | :black_nib: |
-| [no-dot-ts-imports](https://rotki.github.io/eslint-plugin/rules/no-dot-ts-imports)                           | Disallow .ts extension in import statements                               | :black_nib: |
-| [no-legacy-library-import](https://rotki.github.io/eslint-plugin/rules/no-legacy-library-import)             | Disallow imports from @rotki/ui-library-compat                            | :black_nib: |
-| [no-unused-i18n-keys](https://rotki.github.io/eslint-plugin/rules/no-unused-i18n-keys)                       | Disallow unused i18n keys in locale files                                 | :black_nib: |
+See the [full list of available rules](https://rotki.github.io/eslint-plugin/rules/),
+including which are enabled by the `recommended` preset and which are auto-fixable.
 
 ## Documentation
 
