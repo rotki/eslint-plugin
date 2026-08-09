@@ -12,6 +12,7 @@ export const RULE_NAME = 'no-unused-i18n-keys';
 export type MessageIds = 'unused';
 
 export type Options = [{
+  cache: boolean;
   extensions: string[];
   ignoreKeys: string[];
   src: string;
@@ -214,7 +215,7 @@ export default createEslintRule<Options, MessageIds>({
       if (rootExpr.type !== 'JSONObjectExpression')
         return {};
 
-      const usedKeys = collectAllUsedKeys(options.src, options.extensions);
+      const usedKeys = collectAllUsedKeys(options.src, options.extensions, options.cache);
       const linkedKeys = new Set<string>();
       const paths: Array<{ key: string; node: JsonAST.JSONProperty }> = [];
       readJsonLocale(rootExpr, '', paths, linkedKeys);
@@ -251,7 +252,7 @@ export default createEslintRule<Options, MessageIds>({
       if (!mapping)
         return {};
 
-      const usedKeys = collectAllUsedKeys(options.src, options.extensions);
+      const usedKeys = collectAllUsedKeys(options.src, options.extensions, options.cache);
       const linkedKeys = new Set<string>();
       const paths: Array<{ key: string; node: YamlAST.YAMLPair }> = [];
       readYamlLocale(mapping, '', paths, linkedKeys);
@@ -282,6 +283,7 @@ export default createEslintRule<Options, MessageIds>({
     return {};
   },
   defaultOptions: [{
+    cache: true,
     extensions: ['.vue', '.ts'],
     ignoreKeys: [],
     src: 'src',
@@ -299,6 +301,10 @@ export default createEslintRule<Options, MessageIds>({
       {
         additionalProperties: false,
         properties: {
+          cache: {
+            description: 'Reuse the scan of the source tree between runs and across ESLint worker threads, via a cache under the system temp directory. Set false to scan every time.',
+            type: 'boolean',
+          },
           extensions: {
             items: { type: 'string' },
             type: 'array',

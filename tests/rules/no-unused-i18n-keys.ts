@@ -1,9 +1,11 @@
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { RuleTester } from 'eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import * as yamlParser from 'yaml-eslint-parser';
 import rule, { RULE_NAME } from '../../src/rules/no-unused-i18n-keys';
-import { resetCache } from '../../src/rules/no-unused-i18n-keys/key-collector';
+import { collectAllUsedKeys, resetCache } from '../../src/rules/no-unused-i18n-keys/key-collector';
 import { extractLinkedKeys } from '../../src/rules/no-unused-i18n-keys/key-matching';
 import { extractKeysFromSfcI18nBlock } from '../../src/rules/no-unused-i18n-keys/vue-template';
 
@@ -586,6 +588,54 @@ describe('extractKeysFromSfcI18nBlock', () => {
     const keys = new Set<string>();
     extractKeysFromSfcI18nBlock(content, keys);
     expect(keys).toContain('en.hello');
+  });
+
+  it('drops the keys of a file that no longer exists', () => {
+    // The cache persists between runs, so an entry for a deleted file would keep its keys alive.
+    // That direction is silent: the key stays 'used', and the unused key it has become is never
+    // reported. Driving the collector directly is what makes the second run read the cache from
+    // disk the way a separate lint run would.
+    const src = mkdtempSync(join(tmpdir(), 'rotki-i18n-collector-'));
+    const doomed = join(src, 'doomed.ts');
+
+    try {
+      writeFileSync(doomed, `export const label = t('gone.key');\n`, 'utf-8');
+      expect(collectAllUsedKeys(src, ['.ts'])).toContain('gone.key');
+
+      rmSync(doomed);
+      resetCache();
+      expect(collectAllUsedKeys(src, ['.ts'])).not.toContain('gone.key');
+
+      // A third read matters: the run above rewrites the cache, and only a run that finds its
+      // fingerprint still current unions the stored entries wholesale. A cache that kept the
+      // deleted file's entry looks correct until exactly here.
+      resetCache();
+      expect(collectAllUsedKeys(src, ['.ts'])).not.toContain('gone.key');
+    }
+    finally {
+      rmSync(src, { force: true, recursive: true });
+    }
+  });
+
+  it('re-reads a file whose contents changed', () => {
+    const src = mkdtempSync(join(tmpdir(), 'rotki-i18n-collector-'));
+    const file = join(src, 'messages.ts');
+
+    try {
+      writeFileSync(file, `export const label = t('first.key');\n`, 'utf-8');
+      expect(collectAllUsedKeys(src, ['.ts'])).toContain('first.key');
+
+      // Same length as the original, so a cache keyed on size would not notice the change.
+      writeFileSync(file, `export const label = t('other.key');\n`, 'utf-8');
+      resetCache();
+
+      const keys = collectAllUsedKeys(src, ['.ts']);
+      expect(keys).toContain('other.key');
+      expect(keys).not.toContain('first.key');
+    }
+    finally {
+      rmSync(src, { force: true, recursive: true });
+    }
   });
 
   it('warns on invalid JSON (e.g. JSON5) in i18n block', () => {

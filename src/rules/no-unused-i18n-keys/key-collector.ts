@@ -1,15 +1,24 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import process from 'node:process';
-import { threadId } from 'node:worker_threads';
+import { readFileSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { parse as parseTs } from '@typescript-eslint/parser';
 import debugFactory from 'debug';
 import { globSync } from 'tinyglobby';
 import { type AST, parse as parseVue } from 'vue-eslint-parser';
 
 import { walkTsAst } from './ast-walker';
+import {
+  acquireScanLock,
+  awaitPublishedScan,
+  DISK_CACHE_ENABLED,
+  type DiskCache,
+  diskCachePath,
+  keysOf,
+  lockPath,
+  readDiskCache,
+  releaseScanLock,
+  writeDiskCache,
+} from './key-cache';
 import { extractKeysFromSfcI18nBlock, extractKeysFromVueTemplate } from './vue-template';
 
 const debug = debugFactory('@rotki/eslint-plugin:i18n-key-collector');
@@ -20,20 +29,20 @@ interface CacheEntry {
 }
 
 const fileCache = new Map<string, CacheEntry>();
-let cachedUsedKeys: { fingerprint: string; keys: Set<string>; srcDir: string } | undefined;
+let cachedUsedKeys: { extensions: string; fingerprint: string; keys: Set<string>; srcDir: string; verifiedAt: number } | undefined;
+
+/**
+ * How long a verified result is reused without re-reading the tree.
+ *
+ * One lint run asks once per locale file — seven times here — and hashing the tree for each costs
+ * ~20ms that cannot discover anything, since the run is reading a snapshot of the tree anyway.
+ * The window is what a long-lived process (an IDE language server) can lag behind an edit by, so it
+ * is kept to a second: long enough to cover a run, short enough that nobody notices.
+ */
+const VERIFY_TTL_MS = 1000;
 
 const I18N_CALL_PATTERN = /\bt\s*\(|\bte\s*\(|\btc\s*\(|\$t\s*\(|\$te\s*\(|\$tc\s*\(/;
 const VUE_I18N_PATTERN = /\bt\s*\(|\bte\s*\(|\btc\s*\(|\$t\s*\(|\$te\s*\(|\$tc\s*\(|<i18n[\s>-]|v-t\b/;
-
-/**
- * Scanning the source tree costs seconds, and ESLint's multithread linting gives every worker its
- * own module instance — so a process-local cache alone is recomputed once per worker that happens
- * to be handed a locale file. ESLint exposes no way to share state between workers, so the shared
- * layer has to be the filesystem.
- *
- * Disabled by setting `ROTKI_ESLINT_I18N_CACHE=0`, which falls back to the in-memory cache alone.
- */
-const DISK_CACHE_ENABLED = process.env.ROTKI_ESLINT_I18N_CACHE !== '0';
 
 /**
  * The shape both parsers share, and all this module reads: statements to walk, plus the SFC
@@ -121,170 +130,72 @@ function collectKeysFromFile(filePath: string): Set<string> {
   return keys;
 }
 
-/**
- * Identifies one state of the source tree: which files exist, and their size and mtime. Stat-ing
- * every file costs milliseconds against the seconds spent parsing them, which is what makes it
- * affordable to verify the cache on every call rather than trusting it blindly.
- */
-function fingerprintOf(files: string[], extensions: string[]): string {
-  const hash = createHash('sha1').update(extensions.join(','));
+interface FileDigest {
+  digest: string;
+  path: string;
+}
 
-  for (const file of files) {
+/**
+ * Hashes every candidate's contents. The result serves both purposes: hashed together it identifies
+ * one state of the whole tree, and per file it says whether that file's cached keys are still good.
+ *
+ * Contents rather than mtime and size, because the cost of being wrong here is a deleted
+ * translation — see {@link DiskCache}. The read is discarded immediately; the few files that turn
+ * out to need parsing are read again, which is cheaper than holding the whole tree in memory.
+ */
+function digestFiles(files: string[]): FileDigest[] {
+  const digests: FileDigest[] = [];
+
+  for (const path of files) {
     try {
-      const stats = statSync(file);
-      hash.update(`\0${file}\0${stats.size}\0${stats.mtimeMs}`);
+      digests.push({ digest: createHash('sha1').update(readFileSync(path)).digest('hex'), path });
     }
     catch {
-      hash.update(`\0${file}\0missing`);
+      // Vanished between the glob and the read; treated as absent, and its keys go with it.
     }
+  }
+
+  return digests;
+}
+
+function fingerprintOf(digests: FileDigest[], extensions: string[]): string {
+  const hash = createHash('sha1').update(extensions.join(','));
+
+  for (const file of digests) {
+    hash.update(`\0${file.path}\0${file.digest}`);
   }
 
   return hash.digest('hex');
 }
 
-function cacheDir(): string {
-  return join(tmpdir(), 'rotki-eslint-plugin-i18n');
-}
-
-function diskCachePath(srcDir: string, fingerprint: string): string {
-  const key = createHash('sha1').update(`${srcDir}\0${fingerprint}`).digest('hex');
-  return join(cacheDir(), `${key}.json`);
-}
-
-function readDiskCache(srcDir: string, fingerprint: string): Set<string> | undefined {
-  if (!DISK_CACHE_ENABLED)
-    return undefined;
-
-  try {
-    const raw = readFileSync(diskCachePath(srcDir, fingerprint), 'utf-8');
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed))
-      return undefined;
-
-    const keys = new Set<string>();
-    for (const key of parsed) {
-      if (typeof key === 'string')
-        keys.add(key);
-    }
-    debug(`Reused ${keys.size} keys from the disk cache for ${srcDir}`);
-    return keys;
-  }
-  catch {
-    return undefined;
-  }
-}
-
-function writeDiskCache(srcDir: string, fingerprint: string, keys: Set<string>): void {
-  if (!DISK_CACHE_ENABLED)
-    return;
-
-  const target = diskCachePath(srcDir, fingerprint);
-
-  try {
-    mkdirSync(cacheDir(), { recursive: true });
-    // Two workers can finish the scan at once, so publish by rename: every reader sees either the
-    // previous file or a complete new one, never a half-written one.
-    const temporary = `${target}.${process.pid}.${threadId}.tmp`;
-    writeFileSync(temporary, JSON.stringify([...keys]), 'utf-8');
-    renameSync(temporary, target);
-  }
-  catch (error) {
-    debug(`Failed to write the disk cache for ${srcDir}: ${String(error)}`);
-  }
-}
-
 /**
- * A scan takes seconds, and every worker starts at once, so without coordination they all miss the
- * cache together and all scan. One wins the right to scan; the rest block until it publishes.
+ * Rebuilds the cache from the tree as it is now, parsing only what the previous cache cannot
+ * account for, then publishes it and releases the lock when this call holds one.
  *
- * `mkdir` is the lock because it is atomic on every filesystem, including network ones — the same
- * reason `proper-lockfile` uses it. That library is not used here because its waiting is
- * promise-based, and an ESLint rule runs synchronously: there is nowhere to await.
+ * The entry map is rebuilt rather than patched, so a file that no longer exists takes its keys with
+ * it. Keeping stale entries would be the dangerous direction: a key whose only user was deleted
+ * would still read as used, and the unused key it now is would go unreported.
  */
-const LOCK_STALE_MS = 30_000;
-const LOCK_WAIT_MS = 60_000;
-const LOCK_POLL_MS = 25;
-
-/** Blocks this thread. `Atomics.wait` on a buffer nobody notifies is a sleep with no busy loop. */
-function sleepSync(milliseconds: number): void {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
-}
-
-function lockPath(srcDir: string, fingerprint: string): string {
-  return `${diskCachePath(srcDir, fingerprint)}.lock`;
-}
-
-function acquireScanLock(path: string): boolean {
-  try {
-    // The parent has to exist first, and must be created with `recursive` so an existing one is not
-    // an error. The lock itself is then a plain `mkdir`, which fails when it already exists — that
-    // failure is the whole mechanism.
-    mkdirSync(cacheDir(), { recursive: true });
-    mkdirSync(path, { recursive: false });
-    return true;
-  }
-  catch {
-    // Held by someone else, or left behind by a process that died mid-scan. Age tells them apart.
-    try {
-      if (Date.now() - statSync(path).mtimeMs > LOCK_STALE_MS) {
-        rmSync(path, { force: true, recursive: true });
-        mkdirSync(path, { recursive: false });
-        return true;
-      }
-    }
-    catch {
-      // Lost the race to clear it; treat as held.
-    }
-    return false;
-  }
-}
-
-function releaseScanLock(path: string): void {
-  try {
-    rmSync(path, { force: true, recursive: true });
-  }
-  catch {
-    // A stale-lock sweep may have removed it already; the cache is published either way.
-  }
-}
-
-/** Waits for whoever holds the lock to publish. Returns undefined if they never do. */
-function awaitPublishedScan(srcDir: string, fingerprint: string, path: string): Set<string> | undefined {
-  const deadline = Date.now() + LOCK_WAIT_MS;
-
-  while (Date.now() < deadline) {
-    sleepSync(LOCK_POLL_MS);
-
-    const published = readDiskCache(srcDir, fingerprint);
-    if (published)
-      return published;
-
-    // The holder died without publishing, so stop waiting on it and scan instead.
-    try {
-      statSync(path);
-    }
-    catch {
-      return undefined;
-    }
-  }
-
-  debug(`Timed out waiting for another worker to scan ${srcDir}`);
-  return undefined;
-}
-
-/** Reads every file, publishes the result, and releases the lock when this call holds it. */
-function scanTree(files: string[], srcDir: string, fingerprint: string, heldLock: string | undefined): Set<string> {
-  debug(`Found ${files.length} source files in ${srcDir}`);
+function scanTree(files: FileDigest[], previous: DiskCache | undefined, cachePath: string | undefined, fingerprint: string, heldLock: string | undefined): Set<string> {
+  const entries: DiskCache['entries'] = {};
   const allKeys = new Set<string>();
+  let parsed = 0;
 
   try {
     for (const file of files) {
-      for (const key of collectKeysFromFile(file)) {
+      const cached = previous?.entries[file.path];
+      const keys = cached?.digest === file.digest
+        ? cached.keys
+        : (parsed++, [...collectKeysFromFile(file.path)]);
+
+      entries[file.path] = { digest: file.digest, keys };
+      for (const key of keys)
         allKeys.add(key);
-      }
     }
 
-    writeDiskCache(srcDir, fingerprint, allKeys);
+    debug(`Parsed ${parsed} of ${files.length} source files`);
+    if (cachePath)
+      writeDiskCache(cachePath, { entries, fingerprint });
   }
   finally {
     if (heldLock)
@@ -294,37 +205,83 @@ function scanTree(files: string[], srcDir: string, fingerprint: string, heldLock
   return allKeys;
 }
 
-export function collectAllUsedKeys(srcDir: string, extensions: string[]): Set<string> {
+/** The cache answers directly only when it was written for exactly this tree state. */
+function keysIfCurrent(cache: DiskCache | undefined, fingerprint: string, srcDir: string): Set<string> | undefined {
+  if (!cache || cache.fingerprint !== fingerprint)
+    return undefined;
+
+  debug(`Reused ${Object.keys(cache.entries).length} cached files for ${srcDir}`);
+  return keysOf(cache);
+}
+
+function awaitAnotherWorker(useDisk: boolean, holdsLock: boolean, cachePath: string, fingerprint: string, lock: string): Set<string> | undefined {
+  if (holdsLock || !useDisk)
+    return undefined;
+
+  return awaitPublishedScan(cachePath, fingerprint, lock);
+}
+
+/**
+ * The result of a verification recent enough to reuse without re-reading the tree.
+ *
+ * `extensions` is compared explicitly because this runs before any fingerprint exists to fold it
+ * into.
+ */
+function recentlyVerified(srcDir: string, extensionsKey: string): Set<string> | undefined {
+  if (!cachedUsedKeys || cachedUsedKeys.srcDir !== srcDir || cachedUsedKeys.extensions !== extensionsKey)
+    return undefined;
+
+  return Date.now() - cachedUsedKeys.verifiedAt < VERIFY_TTL_MS ? cachedUsedKeys.keys : undefined;
+}
+
+/** Everything the disk layer does, kept apart from the in-memory path that always applies. */
+function collectViaDisk(files: FileDigest[], srcDir: string, extensions: string[], fingerprint: string): Set<string> {
+  const cachePath = diskCachePath(srcDir, extensions);
+  const previous = readDiskCache(cachePath);
+
+  const current = keysIfCurrent(previous, fingerprint, srcDir);
+  if (current)
+    return current;
+
+  const lock = lockPath(cachePath);
+  const holdsLock = acquireScanLock(lock);
+
+  // Falling through when this returns nothing means scanning anyway: slower than waiting, never wrong.
+  const published = awaitAnotherWorker(true, holdsLock, cachePath, fingerprint, lock);
+  if (published)
+    return published;
+
+  // Re-read under the lock: the holder we waited behind may have published a newer cache than the
+  // one read above, which turns a full parse into a stat-match.
+  const base = holdsLock ? readDiskCache(cachePath) ?? previous : previous;
+  return scanTree(files, base, cachePath, fingerprint, holdsLock ? lock : undefined);
+}
+
+export function collectAllUsedKeys(srcDir: string, extensions: string[], cache = true): Set<string> {
   const resolvedSrc = resolve(srcDir);
+  const extensionsKey = extensions.join(',');
+
+  const recent = recentlyVerified(resolvedSrc, extensionsKey);
+  if (recent)
+    return recent;
+
   const patterns = extensions.map(ext => `**/*${ext}`);
-  const files = globSync(patterns, { absolute: true, cwd: resolvedSrc }).sort();
+  const files = digestFiles(globSync(patterns, { absolute: true, cwd: resolvedSrc }).sort());
   const fingerprint = fingerprintOf(files, extensions);
 
   if (cachedUsedKeys && cachedUsedKeys.srcDir === resolvedSrc && cachedUsedKeys.fingerprint === fingerprint) {
+    cachedUsedKeys.verifiedAt = Date.now();
     return cachedUsedKeys.keys;
   }
 
-  const fromDisk = readDiskCache(resolvedSrc, fingerprint);
-  if (fromDisk) {
-    cachedUsedKeys = { fingerprint, keys: fromDisk, srcDir: resolvedSrc };
-    return fromDisk;
-  }
+  // Either switch turns the disk off. The option is how a project opts out; the environment
+  // variable is how one run opts out without touching the config.
+  const keys = cache && DISK_CACHE_ENABLED
+    ? collectViaDisk(files, resolvedSrc, extensions, fingerprint)
+    : scanTree(files, undefined, undefined, fingerprint, undefined);
 
-  const lock = lockPath(resolvedSrc, fingerprint);
-  const holdsLock = DISK_CACHE_ENABLED && acquireScanLock(lock);
-
-  if (DISK_CACHE_ENABLED && !holdsLock) {
-    const published = awaitPublishedScan(resolvedSrc, fingerprint, lock);
-    if (published) {
-      cachedUsedKeys = { fingerprint, keys: published, srcDir: resolvedSrc };
-      return published;
-    }
-    // Falling through means scanning anyway: slower than waiting, but never wrong.
-  }
-
-  const allKeys = scanTree(files, resolvedSrc, fingerprint, holdsLock ? lock : undefined);
-  cachedUsedKeys = { fingerprint, keys: allKeys, srcDir: resolvedSrc };
-  return allKeys;
+  cachedUsedKeys = { extensions: extensionsKey, fingerprint, keys, srcDir: resolvedSrc, verifiedAt: Date.now() };
+  return keys;
 }
 
 export function resetCache(): void {
