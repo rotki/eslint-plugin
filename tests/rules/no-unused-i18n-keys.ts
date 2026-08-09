@@ -133,6 +133,21 @@ jsonTester.run(`${RULE_NAME} (json/linked-messages)`, rule, {
         ignoreKeys: ['alias'],
       }],
     },
+    {
+      // The link sits below the root, so this only passes if links are collected on the way down
+      // rather than from the top level alone. `target` has no other user.
+      filename: 'locales/en.json',
+      code: `{
+  "wrapper": {
+    "alias": "@:target"
+  },
+  "target": "Target value"
+}`,
+      options: [{
+        ...ruleOptions[0],
+        ignoreKeys: ['wrapper.alias'],
+      }],
+    },
   ],
   invalid: [
     {
@@ -478,6 +493,32 @@ yamlTester.run(`${RULE_NAME} (yaml/linked-messages)`, rule, {
     {
       filename: 'locales/en.yaml',
       code: `used:\n  key: Used value\nalias: "@:used.key"`,
+      options: [{
+        ...ruleOptions[0],
+        ignoreKeys: ['alias'],
+      }],
+    },
+    {
+      // A pair whose key is not a scalar has no key path, so it is never reported — but the links
+      // in its value still have to resolve. `target` is reachable only through that link, so if
+      // collapsing the key-path and linked-key walks ever skips such a pair, this reports it.
+      filename: 'locales/en.yaml',
+      code: `? [complex, key]\n: "@:target"\ntarget: Target value`,
+      options: ruleOptions,
+    },
+    {
+      // As above for JSON: the link is nested, so it is only found by collecting on the way down.
+      filename: 'locales/en.yaml',
+      code: `wrapper:\n  alias: "@:target"\ntarget: Target value`,
+      options: [{
+        ...ruleOptions[0],
+        ignoreKeys: ['wrapper.alias'],
+      }],
+    },
+    {
+      // The braced form, which the JSON suite covers but the YAML suite did not.
+      filename: 'locales/en.yaml',
+      code: `alias: "@:{target}"\ntarget: Target value`,
       options: [{
         ...ruleOptions[0],
         ignoreKeys: ['alias'],

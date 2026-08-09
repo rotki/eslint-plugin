@@ -45,29 +45,32 @@ function isYamlProgram(ast: unknown): ast is YamlAST.YAMLProgram {
   return getProgramFirstBodyType(ast) === 'YAMLDocument';
 }
 
-function buildJsonKeyPaths(node: JsonAST.JSONObjectExpression, prefix: string, paths: Array<{ key: string; node: JsonAST.JSONProperty }>): void {
+/**
+ * Walks the locale object once, collecting both things it holds: the path of every leaf, and the
+ * keys other messages link to. They were two traversals of the same tree, and the tree is the
+ * largest thing this rule touches — `en.json` alone is several thousand keys.
+ */
+function readJsonLocale(
+  node: JsonAST.JSONObjectExpression,
+  prefix: string,
+  paths: Array<{ key: string; node: JsonAST.JSONProperty }>,
+  linkedKeys: Set<string>,
+): void {
   for (const prop of node.properties) {
     const keyName = prop.key.type === 'JSONLiteral' ? String(prop.key.value) : (prop.key).name;
     const fullKey = prefix ? `${prefix}.${keyName}` : keyName;
 
     if (prop.value.type === 'JSONObjectExpression') {
-      buildJsonKeyPaths(prop.value, fullKey, paths);
+      readJsonLocale(prop.value, fullKey, paths, linkedKeys);
+      continue;
     }
-    else {
-      paths.push({ key: fullKey, node: prop });
-    }
-  }
-}
 
-function collectJsonLinkedKeys(node: JsonAST.JSONObjectExpression, linkedKeys: Set<string>): void {
-  for (const prop of node.properties) {
+    paths.push({ key: fullKey, node: prop });
+
     if (prop.value.type === 'JSONLiteral' && typeof prop.value.value === 'string') {
       for (const key of extractLinkedKeys(prop.value.value)) {
         linkedKeys.add(key);
       }
-    }
-    else if (prop.value.type === 'JSONObjectExpression') {
-      collectJsonLinkedKeys(prop.value, linkedKeys);
     }
   }
 }
@@ -92,16 +95,6 @@ function getYamlKeyName(node: YamlAST.YAMLContent | YamlAST.YAMLWithMeta | null)
   return undefined;
 }
 
-function isYamlMapping(node: YamlAST.YAMLContent | YamlAST.YAMLWithMeta | null): node is YamlAST.YAMLMapping | YamlAST.YAMLWithMeta {
-  if (!node)
-    return false;
-  if (node.type === 'YAMLMapping')
-    return true;
-  if (node.type === 'YAMLWithMeta' && node.value?.type === 'YAMLMapping')
-    return true;
-  return false;
-}
-
 function getYamlMapping(node: YamlAST.YAMLContent | YamlAST.YAMLWithMeta | null): YamlAST.YAMLMapping | null {
   if (!node)
     return null;
@@ -112,38 +105,43 @@ function getYamlMapping(node: YamlAST.YAMLContent | YamlAST.YAMLWithMeta | null)
   return null;
 }
 
-function buildYamlKeyPaths(node: YamlAST.YAMLMapping, prefix: string, paths: Array<{ key: string; node: YamlAST.YAMLPair }>): void {
-  for (const pair of node.pairs) {
-    const keyName = getYamlKeyName(pair.key);
-    if (keyName === undefined)
-      continue;
-
-    const fullKey = prefix ? `${prefix}.${keyName}` : keyName;
-
-    if (isYamlMapping(pair.value)) {
-      const mapping = getYamlMapping(pair.value);
-      if (mapping) {
-        buildYamlKeyPaths(mapping, fullKey, paths);
-      }
-    }
-    else {
-      paths.push({ key: fullKey, node: pair });
-    }
-  }
+/** Extends a key path, staying nameless once any segment above it could not be read. */
+function joinKey(prefix: string | undefined, keyName: string | undefined): string | undefined {
+  if (prefix === undefined || keyName === undefined)
+    return undefined;
+  return prefix ? `${prefix}.${keyName}` : keyName;
 }
 
-function collectYamlLinkedKeys(node: YamlAST.YAMLMapping, linkedKeys: Set<string>): void {
+/**
+ * The YAML counterpart of {@link readJsonLocale}.
+ *
+ * `prefix` is `undefined` inside a subtree whose key could not be read. That case is why the two
+ * walks this replaces were not identical: the path walk skipped such a pair outright, while the
+ * linked-key walk still descended into it. Collapsing them naively would silently stop resolving
+ * links under an unreadable key, so the distinction is carried explicitly instead — no path is
+ * produced without a name, and links are collected either way.
+ */
+function readYamlLocale(
+  node: YamlAST.YAMLMapping,
+  prefix: string | undefined,
+  paths: Array<{ key: string; node: YamlAST.YAMLPair }>,
+  linkedKeys: Set<string>,
+): void {
   for (const pair of node.pairs) {
+    const fullKey = joinKey(prefix, getYamlKeyName(pair.key));
+    const mapping = getYamlMapping(pair.value);
+    if (mapping) {
+      readYamlLocale(mapping, fullKey, paths, linkedKeys);
+      continue;
+    }
+
+    if (fullKey !== undefined)
+      paths.push({ key: fullKey, node: pair });
+
     const value = getYamlScalarValue(pair.value);
     if (value) {
       for (const key of extractLinkedKeys(value)) {
         linkedKeys.add(key);
-      }
-    }
-    else {
-      const mapping = getYamlMapping(pair.value);
-      if (mapping) {
-        collectYamlLinkedKeys(mapping, linkedKeys);
       }
     }
   }
@@ -218,12 +216,11 @@ export default createEslintRule<Options, MessageIds>({
 
       const usedKeys = collectAllUsedKeys(options.src, options.extensions);
       const linkedKeys = new Set<string>();
-      collectJsonLinkedKeys(rootExpr, linkedKeys);
+      const paths: Array<{ key: string; node: JsonAST.JSONProperty }> = [];
+      readJsonLocale(rootExpr, '', paths, linkedKeys);
 
       const allUsedKeys = new Set([...usedKeys, ...linkedKeys]);
       const prepared = prepareUsedKeys(allUsedKeys, options.ignoreKeys);
-      const paths: Array<{ key: string; node: JsonAST.JSONProperty }> = [];
-      buildJsonKeyPaths(rootExpr, '', paths);
 
       return {
         'Program:exit': function () {
@@ -256,12 +253,11 @@ export default createEslintRule<Options, MessageIds>({
 
       const usedKeys = collectAllUsedKeys(options.src, options.extensions);
       const linkedKeys = new Set<string>();
-      collectYamlLinkedKeys(mapping, linkedKeys);
+      const paths: Array<{ key: string; node: YamlAST.YAMLPair }> = [];
+      readYamlLocale(mapping, '', paths, linkedKeys);
 
       const allUsedKeys = new Set([...usedKeys, ...linkedKeys]);
       const prepared = prepareUsedKeys(allUsedKeys, options.ignoreKeys);
-      const paths: Array<{ key: string; node: YamlAST.YAMLPair }> = [];
-      buildYamlKeyPaths(mapping, '', paths);
 
       return {
         'Program:exit': function () {
