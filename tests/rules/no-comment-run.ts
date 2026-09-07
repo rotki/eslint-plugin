@@ -66,6 +66,23 @@ const first = 1; // trailing
 const second = 2; // trailing at a different column
       `.trim(),
     },
+    {
+      filename: 'test.ts',
+      code: `
+const colors = {
+  debug: '\\u001B[36m', // cyan
+  trace: '\\u001B[90m', // gray
+};
+      `.trim(),
+    },
+    {
+      filename: 'test.ts',
+      code: `
+const first = 1; // trailing
+// a single own-line comment after it
+const second = 2;
+      `.trim(),
+    },
   ],
   invalid: [
     {
@@ -111,6 +128,16 @@ export {};
 // two
 // three
 const timeout = 5000;
+      `.trim(),
+      errors: [{ messageId: 'run' }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+const first = 1; // trailing
+// prose the trailing comment does not shield
+// and the second line that makes it a run
+const second = 2;
       `.trim(),
       errors: [{ messageId: 'run' }],
     },

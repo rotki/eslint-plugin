@@ -20,6 +20,9 @@ prefix: `eslint-`, `@ts-expect-error`, `@ts-ignore`, `@ts-nocheck`, `prettier-`,
 `v8 ignore` and `istanbul`. A TypeScript triple-slash reference counts as a directive too, in its
 `types`, `path`, `lib` and `no-default-lib` forms, so the header of a `.d.ts` file is not a run.
 
+Only comments alone on their line count. A trailing comment annotates the code it sits after rather
+than narrating what follows, so a column of them down an object literal or an enum is not a run.
+
 The rule is deliberately not autofixable, because the replacement depends on what the comment says:
 documentation of the code below becomes a TSDoc block, a justified value becomes a named constant,
 and a claim about behaviour becomes an assertion or a test name.
@@ -42,6 +45,12 @@ handler(payload);
 // ✓ GOOD: a header of triple-slash references.
 /// <reference types="vite/client" />
 /// <reference types="vue-i18n" />
+
+// ✓ GOOD: trailing comments, whatever their alignment.
+const colors = {
+  debug: '[36m', // cyan
+  trace: '[90m', // gray
+};
 
 // ✗ BAD: two lines of prose.
 // The second line is what makes this a run.

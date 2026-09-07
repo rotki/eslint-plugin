@@ -31,6 +31,11 @@ export default createEslintRule<Options, MessageIds>({
           if (comment.type !== 'Line')
             continue;
 
+          // A trailing comment annotates the code it follows rather than narrating what comes next.
+          const preceding = source.getTokenBefore(comment, { includeComments: true });
+          if (preceding?.loc.end.line === comment.loc.start.line)
+            continue;
+
           const previous = run.at(-1);
           const contiguous = previous
             && comment.loc.start.line === previous.loc.end.line + 1
