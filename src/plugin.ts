@@ -9,6 +9,7 @@ import composableReturnReadonly from './rules/composable-return-readonly';
 import composableSsrSafety from './rules/composable-ssr-safety';
 import consistentRefTypeAnnotation from './rules/consistent-ref-type-annotation';
 import maxDependencies from './rules/max-dependencies';
+import noCommentRun from './rules/no-comment-run';
 import noDeprecatedClasses from './rules/no-deprecated-classes';
 import noDeprecatedComponents from './rules/no-deprecated-components';
 import noDeprecatedProps from './rules/no-deprecated-props';
@@ -34,6 +35,7 @@ const plugin = {
     'composable-ssr-safety': composableSsrSafety,
     'consistent-ref-type-annotation': consistentRefTypeAnnotation,
     'max-dependencies': maxDependencies,
+    'no-comment-run': noCommentRun,
     'no-deprecated-classes': noDeprecatedClasses,
     'no-deprecated-components': noDeprecatedComponents,
     'no-deprecated-props': noDeprecatedProps,

@@ -39,4 +39,11 @@ export default rotki({
   rules: {
     'max-lines': ['error', { max: 1000 }],
   },
+}, {
+  // The plugin entry imports one module per rule, so its import count tracks how many rules
+  // the plugin ships rather than any coupling of its own.
+  files: ['src/plugin.ts'],
+  rules: {
+    '@rotki/max-dependencies': 'off',
+  },
 });

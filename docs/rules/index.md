@@ -37,4 +37,5 @@
 |:--------|:------------|:---|
 | [@rotki/<wbr>composable-input-flexibility](./composable-input-flexibility.html) | Prefer MaybeRefOrGetter over Ref for composable parameters | :black_nib: |
 | [@rotki/<wbr>composable-naming-convention](./composable-naming-convention.html) | Enforce consistent naming for composable options and return types |  |
+| [@rotki/<wbr>no-comment-run](./no-comment-run.html) | Disallow consecutive `//` comment lines |  |
 | [@rotki/<wbr>require-jsdoc-on-composable-options](./require-jsdoc-on-composable-options.html) | Require JSDoc comments on composable options interface properties |  |
