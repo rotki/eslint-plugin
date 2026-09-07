@@ -30,6 +30,7 @@
 | [@rotki/<wbr>composable-return-readonly](./composable-return-readonly.html) | Require returned refs from composables to be wrapped with readonly() | :black_nib: |
 | [@rotki/<wbr>composable-ssr-safety](./composable-ssr-safety.html) | Require browser global access in composables to be SSR-safe |  |
 | [@rotki/<wbr>no-conditional-empty-object-spread](./no-conditional-empty-object-spread.html) | Disallow object spreads that conditionally spread nothing to omit a property |  |
+| [@rotki/<wbr>no-unknown-parameters](./no-unknown-parameters.html) | Disallow function parameters annotated `unknown` outside error handling and type guards |  |
 
 ## stylistic
 
