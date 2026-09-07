@@ -28,6 +28,18 @@ export type CountOptions = number | ((token: Token) => boolean) | {
 
 export interface TokenStore {
   /**
+   * Returns the location of the given node or token.
+   * @param nodeOrToken - The node or token to get the location of.
+   * @returns The location of the node or token.
+   */
+  getLoc: (nodeOrToken: HasLocation) => VAST.LocationRange;
+  /**
+   * Returns the range of the given node or token.
+   * @param nodeOrToken - The node or token to get the range of.
+   * @returns The range of the node or token.
+   */
+  getRange: (nodeOrToken: HasLocation) => VAST.OffsetRange;
+  /**
    * Gets the token starting at the specified index.
    * @param offset - Index of the start of the token's range.
    * @param options - The option object.
