@@ -42,6 +42,17 @@ handler(payload);
     {
       filename: 'test.ts',
       code: `
+/// <reference types="vite/client" />
+/// <reference types="vue-i18n" />
+/// <reference path="./globals.d.ts" />
+/// <reference lib="dom" />
+/// <reference no-default-lib="true" />
+export {};
+      `.trim(),
+    },
+    {
+      filename: 'test.ts',
+      code: `
 /*
  * A block comment spanning lines is not a run.
  */
@@ -72,6 +83,24 @@ const timeout = 5000;
 // v8 ignore next
 // and a line of prose mixed into the run
 handler(payload);
+      `.trim(),
+      errors: [{ messageId: 'run' }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+/// <reference types="vite/client" />
+// and a line of prose mixed into the run
+export {};
+      `.trim(),
+      errors: [{ messageId: 'run' }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+/// not a reference, just prose behind a slash
+/// neither is this
+export {};
       `.trim(),
       errors: [{ messageId: 'run' }],
     },

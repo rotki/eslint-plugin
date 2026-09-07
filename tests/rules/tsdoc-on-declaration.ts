@@ -46,6 +46,15 @@ function accountLabel(account: any): string {
     {
       filename: 'test.ts',
       code: `
+/// <reference types="vite/client" />
+function accountLabel(account: Account): string {
+  return account.label;
+}
+      `.trim(),
+    },
+    {
+      filename: 'test.ts',
+      code: `
 // A plain value may still be introduced by a line comment.
 const timeout = 5000;
       `.trim(),

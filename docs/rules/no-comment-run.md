@@ -17,7 +17,8 @@ allowed.
 A run made entirely of directives is allowed, so several suppressions may be stacked above the line
 they apply to. A run that mixes a directive with prose is reported. Directives are recognised by
 prefix: `eslint-`, `@ts-expect-error`, `@ts-ignore`, `@ts-nocheck`, `prettier-`, `c8 ignore`,
-`v8 ignore` and `istanbul`.
+`v8 ignore` and `istanbul`. A TypeScript triple-slash reference counts as a directive too, in its
+`types`, `path`, `lib` and `no-default-lib` forms, so the header of a `.d.ts` file is not a run.
 
 The rule is deliberately not autofixable, because the replacement depends on what the comment says:
 documentation of the code below becomes a TSDoc block, a justified value becomes a named constant,
@@ -37,6 +38,10 @@ const timeout = 5000;
 // v8 ignore next
 // c8 ignore next
 handler(payload);
+
+// ✓ GOOD: a header of triple-slash references.
+/// <reference types="vite/client" />
+/// <reference types="vue-i18n" />
 
 // ✗ BAD: two lines of prose.
 // The second line is what makes this a run.

@@ -7,8 +7,13 @@ import { AST_NODE_TYPES, type TSESTree } from '@typescript-eslint/utils';
  * @remarks
  * Directives stack legitimately: silencing two rules on one line needs two of them, and a
  * `@ts-expect-error` may sit alongside one.
+ *
+ * A TypeScript triple-slash reference counts as a directive too. Its comment `value` starts with
+ * the third slash, so the final alternative matches `/ <reference types="..." />` and the `path`,
+ * `lib` and `no-default-lib` forms alongside it. The attribute name and `=` are required, so an
+ * ordinary comment that happens to begin with a slash stays prose.
  */
-export const DIRECTIVE_COMMENT = /^\s*(?:eslint-|@ts-(?:expect-error|ignore|nocheck)|prettier-|[cv]8 ignore|istanbul )/;
+export const DIRECTIVE_COMMENT = /^\s*(?:eslint-|@ts-(?:expect-error|ignore|nocheck)|prettier-|[cv]8 ignore|istanbul |\/\s*<reference\s+(?:types|path|lib|no-default-lib)\s*=)/;
 
 /**
  * Collects the `//` comments directly above a node, in source order.
