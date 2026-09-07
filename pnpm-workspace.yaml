@@ -7,4 +7,4 @@ trustPolicy: no-downgrade
 allowBuilds:
   esbuild: true
 overrides:
-  vite: 8.1.5
+  vite: 8.2.2
