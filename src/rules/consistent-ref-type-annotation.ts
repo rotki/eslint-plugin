@@ -16,10 +16,10 @@ const FIXABLE_METHODS = new Set<string>(['ref', 'computed']);
 
 function getFixableCallExpression(declaration: TSESTree.LetOrConstOrVarDeclarator): { callee: TSESTree.Identifier; init: TSESTree.CallExpression } | undefined {
   const init = declaration.init;
-  if (!init || init.type !== TSESTree.AST_NODE_TYPES.CallExpression)
+  if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression)
     return undefined;
   const callee = init.callee;
-  if (!callee || callee.type !== TSESTree.AST_NODE_TYPES.Identifier || !FIXABLE_METHODS.has(callee.name))
+  if (callee?.type !== TSESTree.AST_NODE_TYPES.Identifier || !FIXABLE_METHODS.has(callee.name))
     return undefined;
   return { callee, init };
 }

@@ -75,8 +75,8 @@ export interface TokenStore {
   getFirstTokenBetween: (left: HasLocation, right: HasLocation, options?: SkipOptions) => Token | null;
   /**
    * Gets the last token between two non-overlapping nodes.
-   * @param left Node before the desired token range.
-   * @param right Node after the desired token range.
+   * @param left - Node before the desired token range.
+   * @param right - Node after the desired token range.
    * @param options - The option object.
    * @returns An object representing the token.
    */
@@ -122,8 +122,8 @@ export interface TokenStore {
   getFirstTokensBetween: (left: HasLocation, right: HasLocation, options?: CountOptions) => Token[];
   /**
    * Gets the last `count` tokens between two non-overlapping nodes.
-   * @param left Node before the desired token range.
-   * @param right Node after the desired token range.
+   * @param left - Node before the desired token range.
+   * @param right - Node after the desired token range.
    * @param [options=0] - The option object. Same options as getFirstTokens()
    * @returns Tokens between left and right.
    */
@@ -138,9 +138,9 @@ export interface TokenStore {
   getTokens: (node: HasLocation, beforeCount?: CountOptions, afterCount?: number) => Token[];
   /**
    * Gets all of the tokens between two non-overlapping nodes.
-   * @param left Node before the desired token range.
-   * @param right Node after the desired token range.
-   * @param padding Number of extra tokens on either side of center.
+   * @param left - Node before the desired token range.
+   * @param right - Node after the desired token range.
+   * @param padding - Number of extra tokens on either side of center.
    * @returns Tokens between left and right.
    */
   getTokensBetween: (left: HasLocation, right: HasLocation, padding?: CountOptions) => Token[];
@@ -154,19 +154,19 @@ export interface TokenStore {
   commentsExistBetween: (left: HasLocation, right: HasLocation) => boolean;
   /**
    * Gets all comment tokens directly before the given node or token.
-   * @param nodeOrToken The AST node or token to check for adjacent comment tokens.
+   * @param nodeOrToken - The AST node or token to check for adjacent comment tokens.
    * @returns An array of comments in occurrence order.
    */
   getCommentsBefore: (nodeOrToken: HasLocation) => Token[];
   /**
    * Gets all comment tokens directly after the given node or token.
-   * @param nodeOrToken The AST node or token to check for adjacent comment tokens.
+   * @param nodeOrToken - The AST node or token to check for adjacent comment tokens.
    * @returns An array of comments in occurrence order.
    */
   getCommentsAfter: (nodeOrToken: HasLocation) => Token[];
   /**
    * Gets all comment tokens inside the given node.
-   * @param node The AST node to get the comments for.
+   * @param node - The AST node to get the comments for.
    * @returns An array of comments in occurrence order.
    */
   getCommentsInside: (node: HasLocation) => Token[];
@@ -228,9 +228,9 @@ type CustomBlockVisitorFactory = (context: CustomBlockContext) =>
 export interface ParserServices {
   /**
    * Define handlers to traverse the template body.
-   * @param templateBodyVisitor The template body handlers.
-   * @param scriptVisitor The script handlers. This is optional.
-   * @param options The options. This is optional.
+   * @param templateBodyVisitor - The template body handlers.
+   * @param scriptVisitor - The script handlers. This is optional.
+   * @param options - The options. This is optional.
    */
   defineTemplateBodyVisitor: (
     templateBodyVisitor: { [key: string]: (...args: any) => void },
@@ -240,8 +240,8 @@ export interface ParserServices {
 
   /**
    * Define handlers to traverse the document.
-   * @param documentVisitor The document handlers.
-   * @param options The options. This is optional.
+   * @param documentVisitor - The document handlers.
+   * @param options - The options. This is optional.
    */
   defineDocumentVisitor: (
     documentVisitor: { [key: string]: (...args: any) => void },
@@ -250,10 +250,10 @@ export interface ParserServices {
 
   /**
    * Define handlers to traverse custom blocks.
-   * @param context The rule context.
-   * @param parser The custom parser.
-   * @param rule The custom block rule definition
-   * @param scriptVisitor The script handlers. This is optional.
+   * @param context - The rule context.
+   * @param parser - The custom parser.
+   * @param rule - The custom block rule definition
+   * @param scriptVisitor - The script handlers. This is optional.
    */
   defineCustomBlocksVisitor: (
     context: Rule.RuleContext,

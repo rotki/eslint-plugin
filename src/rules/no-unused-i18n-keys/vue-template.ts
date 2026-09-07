@@ -34,7 +34,7 @@ function isVTDirective(attr: VAST.VAttribute | VAST.VDirective): boolean {
 function getDirectiveExpression(attr: VAST.VAttribute | VAST.VDirective): VAST.ESLintExpression | VAST.VFilterSequenceExpression | VAST.VForExpression | VAST.VOnExpression | VAST.VSlotScopeExpression | VAST.VGenericExpression | null {
   if (attr.type !== 'VAttribute' || !attr.directive)
     return null;
-  if (!attr.value || attr.value.type !== 'VExpressionContainer')
+  if (attr.value?.type !== 'VExpressionContainer')
     return null;
   return attr.value.expression;
 }

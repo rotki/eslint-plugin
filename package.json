@@ -60,7 +60,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.2",
     "@commitlint/config-conventional": "21.2.2",
-    "@rotki/eslint-config": "6.2.0",
+    "@rotki/eslint-config": "8.0.0",
     "@rotki/eslint-plugin": "1.5.1",
     "@types/debug": "4.1.13",
     "@types/node": "24.13.3",
@@ -69,6 +69,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "bumpp": "11.1.0",
     "eslint": "10.9.1",
+    "eslint-plugin-tsdoc": "0.5.2",
     "husky": "9.1.7",
     "lint-staged": "17.4.1",
     "oxc-minify": "0.147.0",

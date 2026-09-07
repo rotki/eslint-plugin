@@ -153,7 +153,7 @@ export default createEslintRule<Options, MessageIds>({
     const sourceCode = getSourceCode(context);
     return defineTemplateBodyVisitor(context, {
       'VAttribute[directive=false][key.name="class"]': function (node: VAST.VAttribute) {
-        if (!node.value || !node.value.value || !node.value.range)
+        if (!node.value?.value || !node.value.range)
           return;
 
         reportRedundant(

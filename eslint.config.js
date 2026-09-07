@@ -46,4 +46,18 @@ export default rotki({
   rules: {
     '@rotki/max-dependencies': 'off',
   },
+}, {
+  // Aggregators on purpose: these exist so the rest of the package imports from one place.
+  files: ['src/types/index.ts', 'src/utils/index.ts', 'scripts/utils/index.ts'],
+  rules: {
+    'unicorn/no-barrel-files': 'off',
+  },
+}, {
+  // The doc comments here are mirrored from vue-eslint-parser, JSDoc-style optional names and
+  // package names in prose included. They are kept verbatim so the types stay diffable upstream.
+  files: ['src/types/vue-parser-services.ts'],
+  rules: {
+    'jsdoc/escape-inline-tags': 'off',
+    'tsdoc/syntax': 'off',
+  },
 });

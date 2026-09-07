@@ -113,7 +113,7 @@ function collectKeysFromFile(filePath: string): Set<string> {
     return new Set();
 
   const cached = fileCache.get(filePath);
-  if (cached && cached.mtimeMs === file.mtimeMs)
+  if (cached?.mtimeMs === file.mtimeMs)
     return cached.keys;
 
   const keys = new Set<string>();
@@ -207,7 +207,7 @@ function scanTree(files: FileDigest[], previous: DiskCache | undefined, cachePat
 
 /** The cache answers directly only when it was written for exactly this tree state. */
 function keysIfCurrent(cache: DiskCache | undefined, fingerprint: string, srcDir: string): Set<string> | undefined {
-  if (!cache || cache.fingerprint !== fingerprint)
+  if (cache?.fingerprint !== fingerprint)
     return undefined;
 
   debug(`Reused ${Object.keys(cache.entries).length} cached files for ${srcDir}`);
@@ -228,7 +228,7 @@ function awaitAnotherWorker(useDisk: boolean, holdsLock: boolean, cachePath: str
  * into.
  */
 function recentlyVerified(srcDir: string, extensionsKey: string): Set<string> | undefined {
-  if (!cachedUsedKeys || cachedUsedKeys.srcDir !== srcDir || cachedUsedKeys.extensions !== extensionsKey)
+  if (cachedUsedKeys?.srcDir !== srcDir || cachedUsedKeys.extensions !== extensionsKey)
     return undefined;
 
   return Date.now() - cachedUsedKeys.verifiedAt < VERIFY_TTL_MS ? cachedUsedKeys.keys : undefined;
@@ -269,7 +269,7 @@ export function collectAllUsedKeys(srcDir: string, extensions: string[], cache =
   const files = digestFiles(globSync(patterns, { absolute: true, cwd: resolvedSrc }).sort());
   const fingerprint = fingerprintOf(files, extensions);
 
-  if (cachedUsedKeys && cachedUsedKeys.srcDir === resolvedSrc && cachedUsedKeys.fingerprint === fingerprint) {
+  if (cachedUsedKeys?.srcDir === resolvedSrc && cachedUsedKeys.fingerprint === fingerprint) {
     cachedUsedKeys.verifiedAt = Date.now();
     return cachedUsedKeys.keys;
   }

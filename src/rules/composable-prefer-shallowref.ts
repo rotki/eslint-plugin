@@ -21,7 +21,7 @@ export default createEslintRule<Options, MessageIds>({
 
         // Only flag when argument is a primitive literal
         const arg = node.arguments[0];
-        if (!arg || arg.type !== AST_NODE_TYPES.Literal)
+        if (arg?.type !== AST_NODE_TYPES.Literal)
           return;
 
         context.report({

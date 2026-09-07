@@ -79,7 +79,7 @@ function findReplacement(className: string): string | undefined {
 }
 
 function getRange(node: VAST.VAttribute | ExpressionType | VAST.ESLintTemplateElement): VAST.OffsetRange {
-  if (node.type === 'VAttribute' && node.value && node.value.range)
+  if (node.type === 'VAttribute' && node.value?.range)
     return node.value.range;
 
   return node.range;
@@ -214,7 +214,7 @@ export default createEslintRule<Options, MessageIds>({
     const source = getSourceCode(context);
     return defineTemplateBodyVisitor(context, {
       'VAttribute[directive=false][key.name="class"]': function (node: VAST.VAttribute) {
-        if (!node.value || !node.value.value)
+        if (!node.value?.value)
           return;
 
         for (const className of node.value.value.split(/\s+/).filter(s => !!s)) {

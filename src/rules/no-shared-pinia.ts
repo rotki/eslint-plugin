@@ -57,7 +57,7 @@ function getRootCalleeName(callee: TSESTree.Node): string | null {
  */
 function callbackOwnerName(fn: FunctionNode): string | null {
   const parent = fn.parent;
-  if (!parent || parent.type !== 'CallExpression')
+  if (parent?.type !== 'CallExpression')
     return null;
   return getRootCalleeName(parent.callee);
 }

@@ -1,3 +1,3 @@
-export * from './eslint';
+export type * from './eslint';
 
-export * from './vue-parser-services';
+export type * from './vue-parser-services';

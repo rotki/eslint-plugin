@@ -1,10 +1,17 @@
 blockExoticSubdeps: true
 minimumReleaseAge: 10080
-saveExact: true
+minimumReleaseAgeExcludePrune: true
+
+# The cooldown is for third-party releases. rotki controls these two, so a companion fix can be
+# shipped and consumed the same day.
+minimumReleaseAgeExclude:
+  - '@rotki/eslint-config'
+  - '@rotki/eslint-plugin'
+trustPolicy: no-downgrade
 shellEmulator: true
 strictDepBuilds: true
-trustPolicy: no-downgrade
-allowBuilds:
-  esbuild: true
+saveExact: true
 overrides:
   vite: 8.2.2
+allowBuilds:
+  esbuild: true

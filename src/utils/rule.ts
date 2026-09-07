@@ -14,7 +14,7 @@ const blobUrl = 'https://rotki.github.io/eslint-plugin/rules/';
 /**
  * Creates reusable function to create rules with default options and docs URLs.
  *
- * @param urlCreator Creates a documentation URL for a given rule name.
+ * @param urlCreator - Creates a documentation URL for a given rule name.
  * @returns Function to create a rule with the docs URL format.
  */
 function RuleCreator(urlCreator: (ruleName: string) => string) {
@@ -58,8 +58,8 @@ function createRule<
       context: Readonly<RuleContext<TMessageIds, TOptions>>,
     ): RuleListener => {
       const optionsWithDefault = context.options.map((options, index) => ({
-        ...defaultOptions[index] || {},
-        ...options || {},
+        ...defaultOptions[index] ?? {},
+        ...options ?? {},
       })) as unknown as TOptions;
       return create(context, optionsWithDefault);
     },

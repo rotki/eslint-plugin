@@ -16,9 +16,7 @@ export default createEslintRule<[Options], MessageIds>({
 
     return {
       ImportDeclaration(node) {
-        if (!firstImportNode) {
-          firstImportNode = node;
-        }
+        firstImportNode ??= node;
 
         // Skip type imports if ignoreTypeImports is true
         if (options.ignoreTypeImports && node.importKind === 'type') {

@@ -94,7 +94,7 @@ export default createEslintRule<Options, MessageIds>({
         if (!getEnclosingComposable(node))
           return;
 
-        if (!node.argument || node.argument.type !== AST_NODE_TYPES.ObjectExpression)
+        if (node.argument?.type !== AST_NODE_TYPES.ObjectExpression)
           return;
 
         for (const prop of node.argument.properties) {
