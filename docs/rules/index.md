@@ -39,3 +39,4 @@
 | [@rotki/<wbr>composable-naming-convention](./composable-naming-convention.html) | Enforce consistent naming for composable options and return types |  |
 | [@rotki/<wbr>no-comment-run](./no-comment-run.html) | Disallow consecutive `//` comment lines |  |
 | [@rotki/<wbr>require-jsdoc-on-composable-options](./require-jsdoc-on-composable-options.html) | Require JSDoc comments on composable options interface properties |  |
+| [@rotki/<wbr>tsdoc-on-declaration](./tsdoc-on-declaration.html) | Document a declaration with TSDoc rather than `//` |  |

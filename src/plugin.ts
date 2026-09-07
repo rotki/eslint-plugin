@@ -19,6 +19,7 @@ import noRedundantFlexRow from './rules/no-redundant-flex-row';
 import noSharedPinia from './rules/no-shared-pinia';
 import noUnusedI18nKeys from './rules/no-unused-i18n-keys/index';
 import requireJsdocOnComposableOptions from './rules/require-jsdoc-on-composable-options';
+import tsdocOnDeclaration from './rules/tsdoc-on-declaration';
 
 const plugin = {
   meta: {
@@ -45,6 +46,7 @@ const plugin = {
     'no-shared-pinia': noSharedPinia,
     'no-unused-i18n-keys': noUnusedI18nKeys,
     'require-jsdoc-on-composable-options': requireJsdocOnComposableOptions,
+    'tsdoc-on-declaration': tsdocOnDeclaration,
   },
 } satisfies ESLint.Plugin;
 
