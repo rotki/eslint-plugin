@@ -118,6 +118,28 @@ beforeEach(() => {
 });
       `.trim(),
     },
+    {
+      filename: 'test.spec.ts',
+      code: `
+test.beforeEach(async ({ request }) => {
+  // Purging here starts every test from a known set and proves nothing was left behind.
+  await purge(request);
+});
+      `.trim(),
+    },
+    {
+      filename: 'test.spec.ts',
+      code: `
+test.describe('purge', () => {
+  // Seeded once for the whole suite, because purging is what each test then exercises.
+  const seeded = seedAll();
+
+  test('should purge', async () => {
+    await purge(seeded);
+  });
+});
+      `.trim(),
+    },
   ],
   invalid: [
     {
@@ -178,6 +200,16 @@ it('should fall back to index.html for the bare origin', async () => {
       filename: 'test.spec.ts',
       code: `
 it.each([1, 2])('should handle %s', async (value) => {
+  // Regression: the cursor was keyed on the full url in one branch.
+  expect(value).toBeDefined();
+});
+      `.trim(),
+      errors: [{ messageId: 'testBody' }],
+    },
+    {
+      filename: 'test.spec.ts',
+      code: `
+test.skip('should handle the legacy shape', async () => {
   // Regression: the cursor was keyed on the full url in one branch.
   expect(value).toBeDefined();
 });

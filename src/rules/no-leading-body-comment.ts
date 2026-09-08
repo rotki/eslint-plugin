@@ -26,6 +26,9 @@ const SUITE_CALLERS = new Set(['describe', 'suite']);
  */
 const HOOK_CALLERS = new Set(['beforeEach', 'afterEach', 'beforeAll', 'afterAll', 'onTestFinished']);
 
+/** The kinds reachable as a property, the way Playwright namespaces them under `test`. */
+const NAMESPACED_KINDS = new Set([...HOOK_CALLERS, ...SUITE_CALLERS]);
+
 /** Statements that a comment above them documents, rather than explaining the function they open. */
 const DECLARATIONS = new Set<AST_NODE_TYPES>([
   AST_NODE_TYPES.ClassDeclaration,
@@ -41,13 +44,28 @@ type FunctionNode =
   | TSESTree.FunctionDeclaration
   | TSESTree.FunctionExpression;
 
+/**
+ * The kind a namespaced call names through its property, as in Playwright's `test.beforeEach`.
+ *
+ * @remarks
+ * The property wins over the object it hangs off only when it names a kind of its own. `it.each`
+ * and `test.skip` name a modifier rather than a kind, so those keep resolving to the object and
+ * stay tests.
+ */
+function namespacedKind(callee: TSESTree.MemberExpression): string | undefined {
+  if (callee.property.type !== AST_NODE_TYPES.Identifier)
+    return undefined;
+
+  return NAMESPACED_KINDS.has(callee.property.name) ? callee.property.name : undefined;
+}
+
 /** The name a call was made under, reading through `it.each(table)` and `test.skip`. */
 function callerName(callee: TSESTree.Node): string | undefined {
   if (callee.type === AST_NODE_TYPES.Identifier)
     return callee.name;
 
   if (callee.type === AST_NODE_TYPES.MemberExpression)
-    return callerName(callee.object);
+    return namespacedKind(callee) ?? callerName(callee.object);
 
   if (callee.type === AST_NODE_TYPES.CallExpression)
     return callerName(callee.callee);

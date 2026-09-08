@@ -43,7 +43,9 @@ belongs.
 **Test containers and lifecycle hooks.** A comment introducing an `it()` describes that test, and
 belongs to the title rather than to the `describe` arrow that happens to hold it. A `beforeEach`
 has neither a declaration to document nor a title to fold into, and its body is setup that reads no
-better as a named function, so the rule would have no fix to offer.
+better as a named function, so the rule would have no fix to offer. Playwright namespaces both under
+`test`, and `test.beforeEach` and `test.describe` are exempt exactly as the bare forms are, while
+`test.skip` and `it.each` stay tests: a property is read as the kind only when it names one.
 
 The rule is deliberately not autofixable. Prose written for the inside of a body is rarely the
 sentence that belongs on the declaration, and a mechanical move would produce a TSDoc summary that
