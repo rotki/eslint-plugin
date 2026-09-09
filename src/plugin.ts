@@ -15,6 +15,7 @@ import noDeprecatedClasses from './rules/no-deprecated-classes';
 import noDeprecatedComponents from './rules/no-deprecated-components';
 import noDeprecatedProps from './rules/no-deprecated-props';
 import noDotTsImport from './rules/no-dot-ts-imports';
+import noInterpolatedI18nKey from './rules/no-interpolated-i18n-key';
 import noLeadingBodyComment from './rules/no-leading-body-comment';
 import noLegacyLibraryImport from './rules/no-legacy-library-import';
 import noRedundantFlexRow from './rules/no-redundant-flex-row';
@@ -45,6 +46,7 @@ const plugin = {
     'no-deprecated-components': noDeprecatedComponents,
     'no-deprecated-props': noDeprecatedProps,
     'no-dot-ts-imports': noDotTsImport,
+    'no-interpolated-i18n-key': noInterpolatedI18nKey,
     'no-leading-body-comment': noLeadingBodyComment,
     'no-legacy-library-import': noLegacyLibraryImport,
     'no-redundant-flex-row': noRedundantFlexRow,

@@ -14,6 +14,7 @@
 | [@rotki/<wbr>no-deprecated-components](./no-deprecated-components.html) | Removes deprecated classes that do not exist anymore | :star::black_nib: |
 | [@rotki/<wbr>no-deprecated-props](./no-deprecated-props.html) | Replaces deprecated props with their replacements | :star::black_nib: |
 | [@rotki/<wbr>no-dot-ts-imports](./no-dot-ts-imports.html) | Checks and replaces .ts extension in import statements. | :star::black_nib: |
+| [@rotki/<wbr>no-interpolated-i18n-key](./no-interpolated-i18n-key.html) | disallow message keys built by interpolating a template literal at the call site | :star: |
 | [@rotki/<wbr>no-legacy-library-import](./no-legacy-library-import.html) | Reports and replaces imports of @rotki/ui-library-compat with @rotki/ui-library | :star::black_nib: |
 | [@rotki/<wbr>no-redundant-flex-row](./no-redundant-flex-row.html) | disallow redundant `flex-row` since `flex` already defaults to the row direction | :star::black_nib: |
 | [@rotki/<wbr>no-shared-pinia](./no-shared-pinia.html) | disallow a Pinia instance shared across tests via `describe`-body or module scope | :star: |

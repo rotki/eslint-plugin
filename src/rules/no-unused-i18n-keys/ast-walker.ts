@@ -11,7 +11,14 @@ export function isAstNode(value: unknown): value is AstNode {
   return value !== null && typeof value === 'object' && 'type' in value && typeof value.type === 'string';
 }
 
-function isI18nCallExpression(node: AstNode): boolean {
+/**
+ * True for the call shapes keys are read from: a bare `t`/`te`/`tc` (or their `$` forms), and a
+ * non-computed member call such as `this.$t(...)`.
+ *
+ * @remarks Shared with `no-interpolated-i18n-key`, so the shapes that create a wildcard usage here
+ * are exactly the shapes that rule bans.
+ */
+export function isI18nCallExpression(node: AstNode): boolean {
   const callee = node.callee;
   if (!isAstNode(callee))
     return false;
