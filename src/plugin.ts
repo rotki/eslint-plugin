@@ -20,6 +20,7 @@ import noLeadingBodyComment from './rules/no-leading-body-comment';
 import noLegacyLibraryImport from './rules/no-legacy-library-import';
 import noRedundantFlexRow from './rules/no-redundant-flex-row';
 import noSharedPinia from './rules/no-shared-pinia';
+import noTemplateRootComment from './rules/no-template-root-comment';
 import noUnknownParameters from './rules/no-unknown-parameters';
 import noUnusedI18nKeys from './rules/no-unused-i18n-keys/index';
 import requireJsdocOnComposableOptions from './rules/require-jsdoc-on-composable-options';
@@ -51,6 +52,7 @@ const plugin = {
     'no-legacy-library-import': noLegacyLibraryImport,
     'no-redundant-flex-row': noRedundantFlexRow,
     'no-shared-pinia': noSharedPinia,
+    'no-template-root-comment': noTemplateRootComment,
     'no-unknown-parameters': noUnknownParameters,
     'no-unused-i18n-keys': noUnusedI18nKeys,
     'require-jsdoc-on-composable-options': requireJsdocOnComposableOptions,

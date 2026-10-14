@@ -18,6 +18,7 @@
 | [@rotki/<wbr>no-legacy-library-import](./no-legacy-library-import.html) | Reports and replaces imports of @rotki/ui-library-compat with @rotki/ui-library | :star::black_nib: |
 | [@rotki/<wbr>no-redundant-flex-row](./no-redundant-flex-row.html) | disallow redundant `flex-row` since `flex` already defaults to the row direction | :star::black_nib: |
 | [@rotki/<wbr>no-shared-pinia](./no-shared-pinia.html) | disallow a Pinia instance shared across tests via `describe`-body or module scope | :star: |
+| [@rotki/<wbr>no-template-root-comment](./no-template-root-comment.html) | disallow comments beside a template's single root element | :star::black_nib: |
 | [@rotki/<wbr>no-unused-i18n-keys](./no-unused-i18n-keys.html) | disallow unused i18n keys in locale files | :star::black_nib: |
 
 ## strict
