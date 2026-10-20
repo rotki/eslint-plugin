@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import process from 'node:process';
 import { RuleTester } from 'eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import * as yamlParser from 'yaml-eslint-parser';
@@ -28,6 +29,20 @@ const yamlTester = new RuleTester({
   languageOptions: {
     parser: yamlParser,
   },
+});
+
+// The disk cache outlives the process, so a shared directory would let one run reuse another's scan
+// and skip the parsing these tests exist to exercise.
+let cacheDir: string;
+
+beforeAll(() => {
+  cacheDir = mkdtempSync(join(tmpdir(), 'rotki-i18n-cache-'));
+  process.env.ROTKI_ESLINT_I18N_CACHE_DIR = cacheDir;
+});
+
+afterAll(() => {
+  delete process.env.ROTKI_ESLINT_I18N_CACHE_DIR;
+  rmSync(cacheDir, { force: true, recursive: true });
 });
 
 beforeEach(() => {

@@ -34,8 +34,9 @@ export interface DiskCache {
   fingerprint: string;
 }
 
+/** `ROTKI_ESLINT_I18N_CACHE_DIR` moves the cache, so tests can start every run from an empty one. */
 function cacheDir(): string {
-  return join(tmpdir(), 'rotki-eslint-plugin-i18n');
+  return process.env.ROTKI_ESLINT_I18N_CACHE_DIR ?? join(tmpdir(), 'rotki-eslint-plugin-i18n');
 }
 
 /** Keyed by the tree, not by its state — the same file is rewritten as the tree changes. */
