@@ -67,7 +67,7 @@
     "@typescript-eslint/eslint-plugin": "8.71.2",
     "@typescript-eslint/rule-tester": "8.71.2",
     "@vitest/coverage-v8": "5.0.4",
-    "bumpp": "11.1.0",
+    "bumpp": "12.3.0",
     "eslint": "10.12.0",
     "eslint-plugin-tsdoc": "0.5.4",
     "husky": "9.1.7",
