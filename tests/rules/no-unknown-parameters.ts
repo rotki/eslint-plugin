@@ -61,6 +61,25 @@ function handle(problem: unknown): void {}
       `.trim(),
       options: [{ allowNames: ['problem'] }],
     },
+    {
+      filename: 'test.ts',
+      code: `
+function parse(raw: unknown, error: unknown): void {}
+      `.trim(),
+      options: [{ allowNames: ['raw'] }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+promise.catch((failure: unknown) => notify(failure));
+      `.trim(),
+    },
+    {
+      filename: 'test.ts',
+      code: `
+promise.then(onDone, function (failure: unknown) { notify(failure); });
+      `.trim(),
+    },
   ],
   invalid: [
     {
@@ -141,6 +160,20 @@ const render = ({ nested }: unknown): void => {};
 function collect(...rest: unknown): void {}
       `.trim(),
       errors: [{ messageId: 'unknownParameter', data: { parameter: 'rest' } }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+promise.then((value: unknown) => use(value));
+      `.trim(),
+      errors: [{ messageId: 'unknownParameter', data: { parameter: 'value' } }],
+    },
+    {
+      filename: 'test.ts',
+      code: `
+promise['catch']((failure: unknown) => notify(failure));
+      `.trim(),
+      errors: [{ messageId: 'unknownParameter', data: { parameter: 'failure' } }],
     },
     {
       filename: 'test.vue',

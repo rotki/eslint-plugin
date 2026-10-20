@@ -7,10 +7,11 @@ export type MessageIds = 'unknownParameter';
 
 export interface RuleOptions {
   /**
-   * Parameter names that may be annotated `unknown`.
+   * Extra parameter names that may be annotated `unknown`.
    *
-   * The defaults are the error-handling names. `ts/use-unknown-in-catch-callback-variable`
-   * requires `unknown` there, so reporting them would put the two rules in conflict.
+   * They are added to the error-handling names, which are always allowed:
+   * `ts/use-unknown-in-catch-callback-variable` requires `unknown` there, so reporting them would
+   * put the two rules in conflict.
    */
   allowNames?: string[];
 }
@@ -87,12 +88,33 @@ function isTypePredicateSubject(owner: ParameterOwner, name: string): boolean {
     && predicate.parameterName.name === name;
 }
 
+/**
+ * Whether the function is a rejection handler: a callback passed to `.catch()`, or the second
+ * argument to `.then()`. Its parameters receive the rejection reason, whatever they are named.
+ */
+function isRejectionHandler(owner: ParameterOwner): boolean {
+  const call = owner.parent;
+  if (call?.type !== AST_NODE_TYPES.CallExpression)
+    return false;
+
+  const callee = call.callee;
+  if (callee.type !== AST_NODE_TYPES.MemberExpression || callee.computed || callee.property.type !== AST_NODE_TYPES.Identifier)
+    return false;
+
+  const [first, second] = call.arguments;
+  return (callee.property.name === 'catch' && first === owner)
+    || (callee.property.name === 'then' && second === owner);
+}
+
 export default createEslintRule<Options, MessageIds>({
   create(context, [options]) {
     const source = getSourceCode(context);
-    const allowNames = new Set(options?.allowNames ?? DEFAULT_ALLOW_NAMES);
+    const allowNames = new Set([...DEFAULT_ALLOW_NAMES, ...(options?.allowNames ?? [])]);
 
     const checkParameters = (node: ParameterOwner): void => {
+      if (isRejectionHandler(node))
+        return;
+
       for (const parameter of node.params) {
         const annotation = parameterAnnotation(parameter);
         if (!annotation || !containsUnknown(annotation.typeAnnotation))
@@ -121,7 +143,7 @@ export default createEslintRule<Options, MessageIds>({
       TSMethodSignature: checkParameters,
     };
   },
-  defaultOptions: [{ allowNames: DEFAULT_ALLOW_NAMES }],
+  defaultOptions: [{ allowNames: [] }],
   meta: {
     docs: {
       description: 'Disallow function parameters annotated `unknown` outside error handling and type guards',

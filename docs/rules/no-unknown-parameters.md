@@ -19,11 +19,14 @@ union containing it, on function declarations and expressions, arrow functions, 
 signatures, and constructor parameter properties. `unknown[]` is not reported, since the annotation
 states a collection rather than an unparsed value.
 
-Two exemptions are built in:
+Three exemptions are built in:
 
-- **Error-handling names**, by default `cause`, `e`, `err`, `error` and `reason`. This is not
-  cosmetic: `@typescript-eslint/use-unknown-in-catch-callback-variable` _requires_ `unknown` on a
-  catch callback parameter, so reporting those names would put the two rules in direct conflict.
+- **Rejection handlers**: any parameter of a callback passed to `.catch()`, or of the second
+  argument to `.then()`, whatever it is named. This is not cosmetic:
+  `@typescript-eslint/use-unknown-in-catch-callback-variable` _requires_ `unknown` there, so
+  reporting it would put the two rules in direct conflict.
+- **Error-handling names**: `cause`, `e`, `err`, `error` and `reason`, wherever they appear, for
+  helpers that receive a caught value outside a `.catch()` callback.
 - **Type-predicate subjects**: `function isAccount(value: unknown): value is Account` has to accept
   `unknown` to be worth writing.
 
@@ -39,8 +42,8 @@ function label(account: Account): string {
   return account.label;
 }
 
-// ✓ GOOD: the catch callback, where `unknown` is required.
-promise.catch((error: unknown) => notify(error));
+// ✓ GOOD: a rejection handler, where `unknown` is required.
+promise.catch((failure: unknown) => notify(failure));
 
 // ✓ GOOD: a type guard has to take `unknown`.
 function isAccount(value: unknown): value is Account {
@@ -61,14 +64,17 @@ function parse(payload: unknown): Account {
 {
   "@rotki/no-unknown-parameters": [
     "error",
-    { "allowNames": ["cause", "e", "err", "error", "reason"] }
+    { "allowNames": ["raw"] }
   ]
 }
 ```
 
-- `allowNames` (`string[]`) — parameter names that may be annotated `unknown`. Replaces the default
-  list, so include the error names if you extend it. Use it for a decoding boundary that genuinely
-  takes raw input, for example `allowNames: ["cause", "e", "err", "error", "reason", "raw"]`.
+- `allowNames` (`string[]`, default `[]`): extra parameter names that may be annotated `unknown`,
+  for a decoding boundary that genuinely takes raw input. The names are added to the built-in
+  error-handling names, which stay allowed.
+
+  Before v1.10.0 this option replaced the error-handling names instead of adding to them. A config
+  that repeated those names to keep them still works; it can now drop them.
 
 ## :rocket: Version
 
