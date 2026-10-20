@@ -58,13 +58,7 @@ interface Token {
 }
 
 function tokenize(value: string): Token[] {
-  const tokens: Token[] = [];
-  const matcher = /\S+/g;
-  let match: RegExpExecArray | null;
-  // eslint-disable-next-line no-cond-assign
-  while ((match = matcher.exec(value)) !== null)
-    tokens.push({ start: match.index, text: match[0] });
-  return tokens;
+  return Array.from(value.matchAll(/\S+/g), match => ({ start: match.index, text: match[0] }));
 }
 
 /**
