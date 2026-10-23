@@ -1,4 +1,5 @@
 blockExoticSubdeps: true
+
 minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 
@@ -7,11 +8,14 @@ minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - '@rotki/eslint-config'
   - '@rotki/eslint-plugin'
+
 trustPolicy: no-downgrade
 shellEmulator: true
 strictDepBuilds: true
 saveExact: true
+
 overrides:
   vite: 8.3.4
+
 allowBuilds:
   esbuild: true
