@@ -34,7 +34,7 @@ let cachedUsedKeys: { extensions: string; fingerprint: string; keys: Set<string>
 /**
  * How long a verified result is reused without re-reading the tree.
  *
- * One lint run asks once per locale file — seven times here — and hashing the tree for each costs
+ * One lint run asks once per locale file (seven times here), and hashing the tree for each costs
  * ~20ms that cannot discover anything, since the run is reading a snapshot of the tree anyway.
  * The window is what a long-lived process (an IDE language server) can lag behind an edit by, so it
  * is kept to a second: long enough to cover a run, short enough that nobody notices.
@@ -59,11 +59,10 @@ function parseSourceFile(content: string, filePath: string): ParsedProgram | und
 
   try {
     if (!isVue) {
-      // Only `walkTsAst` reads this AST, and it looks at node types and child links alone, so the
-      // script goes straight to the TypeScript parser rather than being wrapped in a synthetic
-      // `<script>` block for `vue-eslint-parser`. That skips the SFC machinery, and `parse` skips
-      // the scope analysis `parseForESLint` would build. Positions stay off for the same reason:
-      // nothing here reports on a location.
+      // Only `walkTsAst` reads this AST, using node types and child links alone. So the script goes
+      // straight to the TypeScript parser instead of a synthetic `<script>` block for
+      // `vue-eslint-parser`, and `parse` skips the scope analysis of `parseForESLint`.
+      // Positions stay off too: nothing here reports on a location.
       return parseTs(content, {
         comment: false,
         loc: false,
@@ -140,7 +139,7 @@ interface FileDigest {
  * one state of the whole tree, and per file it says whether that file's cached keys are still good.
  *
  * Contents rather than mtime and size, because the cost of being wrong here is a deleted
- * translation — see {@link DiskCache}. The read is discarded immediately; the few files that turn
+ * translation (see {@link DiskCache}). The read is discarded immediately; the few files that turn
  * out to need parsing are read again, which is cheaper than holding the whole tree in memory.
  */
 function digestFiles(files: string[]): FileDigest[] {

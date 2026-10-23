@@ -36,7 +36,7 @@ tester.run('composable-require-cleanup', rule, {
       `,
     },
     {
-      // No side effects — should not flag
+      // No side effects:should not flag
       filename: 'test.ts',
       code: `
         function useCounter() {
@@ -46,7 +46,7 @@ tester.run('composable-require-cleanup', rule, {
       `,
     },
     {
-      // Not a composable — should not flag
+      // Not a composable:should not flag
       filename: 'test.ts',
       code: `
         function setup() {

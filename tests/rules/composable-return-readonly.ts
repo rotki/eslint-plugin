@@ -25,7 +25,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Non-ref variable returned — should not flag
+      // Non-ref variable returned:should not flag
       filename: 'test.ts',
       code: `
         function useCounter() {
@@ -35,7 +35,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Outside composable — should not flag
+      // Outside composable:should not flag
       filename: 'test.ts',
       code: `
         function setup() {
@@ -45,7 +45,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Computed returned directly — already readonly, should not flag
+      // Computed returned directly:already readonly, should not flag
       filename: 'test.ts',
       code: `
         function useCounter() {
@@ -56,7 +56,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Computed returned with shorthand — already readonly, should not flag
+      // Computed returned with shorthand:already readonly, should not flag
       filename: 'test.ts',
       code: `
         function useDouble() {
@@ -66,7 +66,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Default `model` prefix — writable by convention, should not flag (shorthand)
+      // Default `model` prefix:writable by convention, should not flag (shorthand)
       filename: 'test.ts',
       code: `
         function useInput() {
@@ -76,7 +76,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Default `model` prefix — writable by convention, should not flag (non-shorthand value)
+      // Default `model` prefix:writable by convention, should not flag (non-shorthand value)
       filename: 'test.ts',
       code: `
         function useInput() {
@@ -86,7 +86,7 @@ tester.run('composable-return-readonly', rule, {
       `,
     },
     {
-      // Custom prefixes — `writable` exempt
+      // Custom prefixes:`writable` exempt
       filename: 'test.ts',
       options: [{ writablePrefixes: ['writable'] }],
       code: `
@@ -190,7 +190,7 @@ tester.run('composable-return-readonly', rule, {
       `,
       errors: [{ messageId: 'wrapReadonly' }],
     },
-    // Custom writablePrefixes replaces the default — `model` is no longer exempt
+    // Custom writablePrefixes replaces the default:`model` is no longer exempt
     {
       filename: 'test.ts',
       options: [{ writablePrefixes: ['writable'] }],
@@ -215,7 +215,7 @@ tester.run('composable-return-readonly', rule, {
         ],
       }],
     },
-    // Prefix without a camelCase boundary — `models` is not exempt by `model`
+    // Prefix without a camelCase boundary:`models` is not exempt by `model`
     {
       filename: 'test.ts',
       code: `
@@ -239,7 +239,7 @@ tester.run('composable-return-readonly', rule, {
         ],
       }],
     },
-    // Unnecessary readonly() on computed — should flag
+    // Unnecessary readonly() on computed:should flag
     {
       filename: 'test.ts',
       code: `

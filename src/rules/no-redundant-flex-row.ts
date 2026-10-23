@@ -120,8 +120,8 @@ function reportRedundant(
 /**
  * Extracts statically-known class list strings from a `:class` expression.
  * Only plain string literals (and single-quasi template literals with no
- * interpolation) are considered: anything conditional — object syntax,
- * arrays, ternaries or interpolated templates — is intentionally skipped,
+ * interpolation) are considered. Anything conditional (object syntax,
+ * arrays, ternaries or interpolated templates) is intentionally skipped,
  * since `flex-row` may legitimately be applied behind a runtime condition.
  */
 function plainStringLists(expression: NonNullable<VAST.VExpressionContainer['expression']>): ClassListSource[] {

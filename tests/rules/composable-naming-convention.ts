@@ -32,7 +32,7 @@ tester.run('composable-naming-convention', rule, {
       `,
     },
     {
-      // No type annotation — should not report
+      // No type annotation:should not report
       filename: 'test.ts',
       code: `
         function useCounter(options) {

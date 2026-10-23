@@ -25,7 +25,7 @@ tester.run('composable-prefer-shallowref', rule, {
       `,
     },
     {
-      // ref with non-literal (object) — should not flag
+      // ref with non-literal (object):should not flag
       filename: 'test.ts',
       code: `
         function useCounter() {
@@ -35,7 +35,7 @@ tester.run('composable-prefer-shallowref', rule, {
       `,
     },
     {
-      // ref outside composable — should not flag
+      // ref outside composable:should not flag
       filename: 'test.ts',
       code: `
         function setup() {

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions -- Type assertions are necessary in this file to bridge between three independently-defined type systems (ESLint's @eslint/core, @typescript-eslint/utils, and vue-eslint-parser) that are structurally compatible at runtime but nominally incompatible in TypeScript. This can be revisited when @typescript-eslint/utils aligns with @eslint/core's RuleDefinition types. */
+/* eslint-disable @typescript-eslint/consistent-type-assertions, slop/no-chained-type-assertions -- Type assertions are necessary in this file to bridge between three independently-defined type systems (ESLint's @eslint/core, @typescript-eslint/utils, and vue-eslint-parser) that are structurally compatible at runtime but nominally incompatible in TypeScript. This can be revisited when @typescript-eslint/utils aligns with @eslint/core's RuleDefinition types. */
 import type {
   PluginRuleModule,
   RuleContext,

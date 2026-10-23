@@ -6,6 +6,8 @@ export default rotki({
   },
   stylistic: true,
   formatters: true,
+  slop: true,
+  sonarjs: true,
 }, {
   files: ['src/**/*.ts'],
   rules: {

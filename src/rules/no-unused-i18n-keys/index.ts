@@ -49,7 +49,7 @@ function isYamlProgram(ast: unknown): ast is YamlAST.YAMLProgram {
 /**
  * Walks the locale object once, collecting both things it holds: the path of every leaf, and the
  * keys other messages link to. They were two traversals of the same tree, and the tree is the
- * largest thing this rule touches — `en.json` alone is several thousand keys.
+ * largest thing this rule touches: `en.json` alone is several thousand keys.
  */
 function readJsonLocale(
   node: JsonAST.JSONObjectExpression,
@@ -119,7 +119,7 @@ function joinKey(prefix: string | undefined, keyName: string | undefined): strin
  * `prefix` is `undefined` inside a subtree whose key could not be read. That case is why the two
  * walks this replaces were not identical: the path walk skipped such a pair outright, while the
  * linked-key walk still descended into it. Collapsing them naively would silently stop resolving
- * links under an unreadable key, so the distinction is carried explicitly instead — no path is
+ * links under an unreadable key, so the distinction is carried explicitly instead: no path is
  * produced without a name, and links are collected either way.
  */
 function readYamlLocale(

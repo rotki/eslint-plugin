@@ -32,7 +32,7 @@ tester.run('composable-input-flexibility', rule, {
       `,
     },
     {
-      // Not a composable — should not flag
+      // Not a composable:should not flag
       filename: 'test.ts',
       code: `
         function setup(value: Ref<number>) {
@@ -41,7 +41,7 @@ tester.run('composable-input-flexibility', rule, {
       `,
     },
     {
-      // Written back via set() — must stay a writable Ref
+      // Written back via set():must stay a writable Ref
       filename: 'test.ts',
       code: `
         function useToggle(state: Ref<boolean>) {
@@ -53,7 +53,7 @@ tester.run('composable-input-flexibility', rule, {
       `,
     },
     {
-      // Written back via .value assignment — must stay a writable Ref
+      // Written back via .value assignment:must stay a writable Ref
       filename: 'test.ts',
       code: `
         function useCounter(count: Ref<number>) {
@@ -65,7 +65,7 @@ tester.run('composable-input-flexibility', rule, {
       `,
     },
     {
-      // Written back via update expression — must stay a writable Ref
+      // Written back via update expression:must stay a writable Ref
       filename: 'test.ts',
       code: `
         function useCounter(count: Ref<number>) {
@@ -77,7 +77,7 @@ tester.run('composable-input-flexibility', rule, {
       `,
     },
     {
-      // Written back via compound assignment — must stay a writable Ref
+      // Written back via compound assignment:must stay a writable Ref
       filename: 'test.ts',
       code: `
         function useCounter(count: Ref<number>) {

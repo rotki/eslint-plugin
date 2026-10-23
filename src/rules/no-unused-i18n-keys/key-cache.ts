@@ -10,7 +10,7 @@ const debug = debugFactory('@rotki/eslint-plugin:i18n-key-cache');
 
 /**
  * Scanning the source tree costs seconds, and ESLint's multithread linting gives every worker its
- * own module instance — so a process-local cache alone is recomputed once per worker that happens
+ * own module instance, so a process-local cache alone is recomputed once per worker that happens
  * to be handed a locale file. ESLint exposes no way to share state between workers, so the shared
  * layer has to be the filesystem.
  *
@@ -39,7 +39,7 @@ function cacheDir(): string {
   return process.env.ROTKI_ESLINT_I18N_CACHE_DIR ?? join(tmpdir(), 'rotki-eslint-plugin-i18n');
 }
 
-/** Keyed by the tree, not by its state — the same file is rewritten as the tree changes. */
+/** Keyed by the tree, not by its state: the same file is rewritten as the tree changes. */
 export function diskCachePath(srcDir: string, extensions: string[]): string {
   const key = createHash('sha1').update(`${srcDir}\0${extensions.join(',')}`).digest('hex');
   return join(cacheDir(), `${key}.json`);
@@ -96,8 +96,8 @@ export function keysOf(cache: DiskCache): Set<string> {
  * A scan takes seconds, and every worker starts at once, so without coordination they all miss the
  * cache together and all scan. One wins the right to scan; the rest block until it publishes.
  *
- * `mkdir` is the lock because it is atomic on every filesystem, including network ones — the same
- * reason `proper-lockfile` uses it. That library is not used here because its waiting is
+ * `mkdir` is the lock because it is atomic on every filesystem, including network ones (the same
+ * reason `proper-lockfile` uses it). That library is not used here because its waiting is
  * promise-based, and an ESLint rule runs synchronously: there is nowhere to await.
  */
 const LOCK_STALE_MS = 30_000;
@@ -116,7 +116,7 @@ export function lockPath(cachePath: string): string {
 export function acquireScanLock(path: string): boolean {
   try {
     // The parent has to exist first, and must be created with `recursive` so an existing one is not
-    // an error. The lock itself is then a plain `mkdir`, which fails when it already exists — that
+    // an error. The lock itself is then a plain `mkdir`, which fails when it already exists. That
     // failure is the whole mechanism.
     mkdirSync(cacheDir(), { recursive: true });
     mkdirSync(path, { recursive: false });

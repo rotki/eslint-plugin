@@ -516,9 +516,9 @@ yamlTester.run(`${RULE_NAME} (yaml/linked-messages)`, rule, {
       }],
     },
     {
-      // A pair whose key is not a scalar has no key path, so it is never reported — but the links
-      // in its value still have to resolve. `target` is reachable only through that link, so if
-      // collapsing the key-path and linked-key walks ever skips such a pair, this reports it.
+      // A pair with a non-scalar key has no key path and is never reported, but the links in its
+      // value still have to resolve. `target` is reachable only through that link, so a walk that
+      // skips such a pair reports it.
       filename: 'locales/en.yaml',
       code: `? [complex, key]\n: "@:target"\ntarget: Target value`,
       options: ruleOptions,
@@ -606,10 +606,9 @@ describe('extractKeysFromSfcI18nBlock', () => {
   });
 
   it('drops the keys of a file that no longer exists', () => {
-    // The cache persists between runs, so an entry for a deleted file would keep its keys alive.
-    // That direction is silent: the key stays 'used', and the unused key it has become is never
-    // reported. Driving the collector directly is what makes the second run read the cache from
-    // disk the way a separate lint run would.
+    // The cache persists between runs, so an entry for a deleted file would keep its keys alive,
+    // silently: the key stays 'used' and is never reported. Driving the collector directly makes
+    // the second run read the cache from disk the way a separate lint run would.
     const src = mkdtempSync(join(tmpdir(), 'rotki-i18n-collector-'));
     const doomed = join(src, 'doomed.ts');
 
