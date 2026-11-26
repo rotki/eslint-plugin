@@ -169,37 +169,43 @@ hand as follows.
 
 7. Verify: build, typecheck, lint, `pnpm exec vitest run` and `pnpm run docs:build`. The docs build
    runs the generators. If they rewrite docs you did not touch, leave that out of a dependency
-   change. If any action pin changed, also run zizmor (see Workflow changes).
+   change. If any action pin changed, also run `pnpm run lint:workflows` (see Workflow changes).
 8. Commit in two parts: `chore(deps): update dependencies` (package.json, lockfile,
    `pnpm-workspace.yaml`) and `ci: update github actions` (workflow pins). The pull request body
    should list what was bumped, what was held back and why, and what `pnpm audit` still reports.
 
 ## Workflow changes
 
-Any change under `.github/workflows/`, including action pin bumps, is checked with
-[zizmor](https://docs.zizmor.sh/) before it is committed. Install it with `uvx zizmor`,
-`pipx install zizmor`, Homebrew or your distribution's package.
+Changes under `.github/workflows/`, including action pin bumps, must pass two tools that cover
+different things:
 
-Run it with a GitHub token so the online audits run too. They catch impostor commits, pins whose
-SHA does not match the version comment and actions with known vulnerabilities, which is what
-matters when updating pins:
+- [actionlint](https://github.com/rhysd/actionlint) checks that workflows are valid: YAML and
+  workflow syntax, expression types, `needs` and matrix references, action inputs, and the shell
+  scripts in `run:` steps (through shellcheck).
+- [zizmor](https://docs.zizmor.sh/) checks workflow security: permissions, credential persistence,
+  template injection and pins. Its online audits also catch impostor commits, pins whose SHA does
+  not match the version comment and actions with known vulnerabilities, which is what matters when
+  updating pins.
+
+The `workflow-lint` job in `ci.yml` runs both on every push and on pull requests that change
+`.github/`. Run the same versions locally before committing (needs Docker and `uv`; the token
+enables zizmor's online audits):
 
 ```sh
-GH_TOKEN=$(gh auth token) zizmor .github/workflows
+GH_TOKEN=$(gh auth token) pnpm run lint:workflows
 ```
 
-`zizmor --offline .github/workflows` runs only the local audits, for a quick check without
-network access.
+The actionlint image digest and the zizmor version are pinned in both `ci.yml` and the
+`lint:workflows` script. Move them together, and keep them in step with `rotki/eslint-config` and
+`rotki/ui-library`.
 
-The current baseline is two low `adhoc-packages` findings, both intentional:
+The baseline is no findings. Fix new findings rather than suppressing them. If one has to stay,
+suppress that single line with a `# zizmor: ignore[<audit>] <reason>` comment, never without a
+reason. Two lines are ignored this way today, both `adhoc-packages`:
 
 - `ci.yml`: `pnpm add -D eslint@${{ matrix.eslint }}` installs each supported ESLint major for the
   compatibility matrix.
 - `publish.yml`: `npm install -g npm@11` provides an npm with trusted publishing support.
-
-A change must not add findings beyond this baseline. Fix new findings rather than suppressing
-them. If one has to stay, suppress that single line with a `# zizmor: ignore[<audit>]` comment
-that gives the reason, and update the baseline list above.
 
 When editing workflows by hand, keep the existing patterns: `permissions: {}` at the top level with
 per-job grants, `persist-credentials: false` on `actions/checkout`, SHA pins with a version
