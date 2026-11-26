@@ -169,10 +169,42 @@ hand as follows.
 
 7. Verify: build, typecheck, lint, `pnpm exec vitest run` and `pnpm run docs:build`. The docs build
    runs the generators. If they rewrite docs you did not touch, leave that out of a dependency
-   change.
+   change. If any action pin changed, also run zizmor (see Workflow changes).
 8. Commit in two parts: `chore(deps): update dependencies` (package.json, lockfile,
    `pnpm-workspace.yaml`) and `ci: update github actions` (workflow pins). The pull request body
    should list what was bumped, what was held back and why, and what `pnpm audit` still reports.
+
+## Workflow changes
+
+Any change under `.github/workflows/`, including action pin bumps, is checked with
+[zizmor](https://docs.zizmor.sh/) before it is committed. Install it with `uvx zizmor`,
+`pipx install zizmor`, Homebrew or your distribution's package.
+
+Run it with a GitHub token so the online audits run too. They catch impostor commits, pins whose
+SHA does not match the version comment and actions with known vulnerabilities, which is what
+matters when updating pins:
+
+```sh
+GH_TOKEN=$(gh auth token) zizmor .github/workflows
+```
+
+`zizmor --offline .github/workflows` runs only the local audits, for a quick check without
+network access.
+
+The current baseline is two low `adhoc-packages` findings, both intentional:
+
+- `ci.yml`: `pnpm add -D eslint@${{ matrix.eslint }}` installs each supported ESLint major for the
+  compatibility matrix.
+- `publish.yml`: `npm install -g npm@11` provides an npm with trusted publishing support.
+
+A change must not add findings beyond this baseline. Fix new findings rather than suppressing
+them. If one has to stay, suppress that single line with a `# zizmor: ignore[<audit>]` comment
+that gives the reason, and update the baseline list above.
+
+When editing workflows by hand, keep the existing patterns: `permissions: {}` at the top level with
+per-job grants, `persist-credentials: false` on `actions/checkout`, SHA pins with a version
+comment, and any `${{ }}` expression that carries outside input (pull request data, refs, inputs)
+passed to `run:` steps through `env:` rather than inlined into the script.
 
 ## Releasing
 
