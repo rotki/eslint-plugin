@@ -6,11 +6,12 @@ Thank you for considering contributing to `@rotki/eslint-plugin`! We welcome all
 
 Before you start contributing, make sure you have the following tools installed:
 
-- **Node.js** (version 20 or higher). For ease of setup we recommend the usage of [`nvm`](https://github.com/nvm-sh/nvm).
-- **pnpm** as the package manager
-  - To install pnpm, use:
+- **Node.js** 24, the version in `.nvmrc`. For ease of setup we recommend the usage of [`nvm`](https://github.com/nvm-sh/nvm) (`nvm use`).
+- **pnpm** 12, the version pinned in `package.json` under `packageManager`. The simplest way to get it is:
 
-  `npm install -g pnpm`
+  `corepack enable`
+
+Maintainers and coding agents should also read [AGENTS.md](./AGENTS.md), which covers adding rules, dependency updates and releases in detail.
 
 ## Getting Started
 
@@ -122,38 +123,21 @@ We follow [Semantic Versioning](https://semver.org/) to label our releases. The 
    pnpm run release
    ```
 
-   Follow the prompts to select the appropriate version bump (e.g., patch, minor, major) based on the nature of the changes.
+   Follow the prompts to select the appropriate version bump (e.g., patch, minor, major) based on the nature of the changes. This bumps `package.json`, commits `chore: release vX.Y.Z` and creates the tag locally without pushing.
 
-2. **Push Tag**: After updating the version, push the tag to remote to trigger the release flow.
+2. **Push Tag**: Push the release commit and the tag to `rotki/eslint-plugin` to trigger the release flow.
 
    ```sh
-   git push --follow-tags
+   git push <rotki-remote> main --follow-tags
    ```
 
-3. **Update action tags**: The pushed tag will trigger the CI/CD pipeline to handle the remainder of the release process.
+3. **Approve the publish**: The tag creates the GitHub release with generated notes, then waits for a maintainer to approve the `npm` environment before publishing to npm.
 
-At this point the new version tag should be present at your git repository.
-The next step is to create the major version tag. If you just released `v3.1.1` you now need to update
-the v3 tag and push it as well.
-
-> [!WARNING]
->
-> If you already have pushed a major tag in the past, you might need to overwrite it by using the
-> `--force` flag with the commands. The force is destructive, and you should be really careful when doing so.
-
-```bash
-# Make sure you are at v3.1.1
-git tag v3 # -f if needed
-git push upstream v3 # -f if needed
-```
-
-By doing this you will create, or update the `v3` tag. Any consumers of the action that use this tag
-should also automatically pick the updated action.
+See the Releasing section of [AGENTS.md](./AGENTS.md) for verification steps and how versions are chosen.
 
 > [!NOTE]
 >
-> Make sure to properly follow schemantic versioning and avoid introducing breaking changes in minor
-> or patch releases since that might inconvenience any consumers of the major tag version.
+> Avoid breaking changes in minor or patch releases. Consumers pick those up automatically.
 
 ## Contact
 
