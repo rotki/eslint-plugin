@@ -64,6 +64,69 @@ same steps (`.github/workflows/ci.yml`).
 - Code comments explain why, not what. Disabling a lint rule needs a `--` reason, like the one at
   the top of `src/utils/rule.ts`.
 
+## Hard rules
+
+Follow these in every change.
+
+- **Register every rule in `src/plugin.ts`.** The scaffold does not, and an unregistered rule is in
+  no preset, no docs index and no build.
+- **Do not change what consumers see silently.** Removing or renaming a rule or option, or making
+  defaults report new errors, is a breaking change (see Versioning). Adding a rule to
+  `recommended` turns it on for every consumer of that preset.
+- **Do not hand-edit generated docs.** The header, the "Version" and "Implementation" sections of
+  `docs/rules/*.md` and `docs/rules/index.md` come from `pnpm run generate` and
+  `pnpm run generate:index`.
+- **Do not lower a check to make it pass.** No `eslint-disable`, `@ts-expect-error`, skipped tests,
+  raised lint limits or zizmor ignores, unless the commit explains why the check is wrong for this
+  case.
+- **Do not bypass the git hooks** (`--no-verify`). They run lint-staged and commitlint.
+
+## Verify before you finish
+
+A change is done when the checks for it pass locally. Report which commands you ran and their
+result; if you skipped one, say so and why.
+
+| You changed                               | Run                                                                                          |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Anything                                  | `pnpm run lint`, `pnpm run typecheck`                                                        |
+| A rule or `src/utils/`                    | `pnpm exec vitest run`, with a test that fails without your change                           |
+| A rule's metadata, a new rule or its docs | `pnpm run generate && pnpm run generate:index`, then `pnpm run docs:build`                   |
+| Exports, configs or dependencies          | `pnpm run build`                                                                             |
+| A rule that rotki uses                    | Run it against the rotki frontend (see the "Testing Rules with Rotki" section of the README) |
+| `.github/workflows/`                      | `GH_TOKEN=$(gh auth token) pnpm run lint:workflows`; pin every action to a commit SHA        |
+
+When a check fails, find the cause. Do not retry until it passes, and do not change a test to match
+broken behavior.
+
+## Git and pull requests
+
+On top of the Conventions above, for agents:
+
+- Branch names: `type/short-description` (`fix/no-unknown-parameters-defaults`), never an
+  agent-tool prefix such as `claude/`.
+- End every commit you create or amend with exactly one of each trailer, after a blank line:
+
+  ```text
+  LLM-Model: <provider>/<model-id>
+  Harness: <harness-name> <version>
+  ```
+
+  Use the model selected in the current session, and the version of the harness process that runs
+  you, not of a CLI on `PATH` (a desktop app ships its own copy). Walk up the parent processes
+  (`ps -o pid=,ppid=,args= -p <pid>`) to the binary and ask it for `--version`. If you cannot
+  verify either value, ask before committing.
+
+- No AI `Co-Authored-By` trailers and no "generated with" lines in commits, pull requests or code.
+- Do not push to `main`, merge pull requests, create tags or run `pnpm run release` unless the
+  maintainer asks for that specific step.
+
+## Recording what you learn
+
+Before you finish, ask whether you hit something the next person would trip over. If you did, first
+try to make a tool catch it: a lint rule, a test or a CI check. Write it down only when no tool can,
+short and with the fix or the reason, in this file and in the same pull request. Unfinished work
+goes to the maintainer as a proposed GitHub issue, never as a to-do list in this file.
+
 ## Adding a rule
 
 1. Scaffold it:
