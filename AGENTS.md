@@ -112,8 +112,17 @@ breaking change (see Versioning below).
 
 Renovate opens nothing by itself: the Dependency Dashboard issue
 (`gh issue list -R rotki/eslint-plugin --search "Dependency Dashboard"`) lists pending updates for
-approval (`.github/renovate.json5`). A maintainer can tick boxes there, or do a batched update by
-hand as follows.
+approval (`.github/renovate.json5`).
+
+**Prefer one batched update over approving Renovate pull requests one at a time.** Use the
+dashboard as the checklist, and do a maintenance pass by hand when updates have piled up (roughly
+monthly) and before a release. A batch is a single branch and pull request with a few commits, so
+the lockfile is resolved once, CI and review run once, and interactions between updates (a plugin
+bump that changes lint results, a transitive package that two updates share) show up together.
+Renovate notices the merged versions and clears those dashboard entries by itself.
+
+Tick a single dashboard box only for an update that cannot wait for the next batch, such as a fix
+for a security advisory or a bug that blocks a consumer. The procedure below is the batched pass.
 
 ### Policy
 
