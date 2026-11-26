@@ -58,7 +58,7 @@ jobs:
         run: pnpm run build
 
       - name: Install npm 11
-        run: npm install -g npm@11
+        run: npm install -g npm@11 # zizmor: ignore[adhoc-packages] npm 11 provides trusted publishing
 
       - name: publish to npm
         run: pnpm -r publish --access=public --no-git-checks
