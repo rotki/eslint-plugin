@@ -275,8 +275,8 @@ Semantic versioning, applied to what consumers see when they lint:
 
 These live in GitHub and npm, not in the repository. Keep this list current when they change.
 
-- `main` is protected: 1 approving review, and the `ci`, `commit-lint` and `license/cla` checks
-  must pass. Contributors sign the rotki CLA (checked by `license/cla`).
+- `main` is protected: 1 approving review, and the `ci`, `commit-lint`, `Workflow lint` and
+  `license/cla` checks must pass. Contributors sign the rotki CLA (checked by `license/cla`).
 - The `@rotki/maintainers` team has write access and is the code owner for everything
   (`.github/CODEOWNERS`). A team needs write access for a code owner entry to take effect.
 - The `npm` environment allows only `v*` tags and requires a reviewer to approve each publish.
